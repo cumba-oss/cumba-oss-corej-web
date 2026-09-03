@@ -115,7 +115,7 @@ jobs:
       #
       # ⛔ The artifact NAME must stay `release-archives`: the release job downloads
       #    exactly that name. A mismatch fails at download — BEFORE the signing steps, so
-      #    it looks like a GPG problem and is not one. Measured on cumba-oss-cdisc-rules
+      #    it looks like a GPG problem and is not one. Measured on cumba-oss-corej-rules
       #    2026-09-03: its Gitea build uploaded `release-jars` while its release job
       #    downloaded `release-archives`, and v0.2.0 went red one second in.
       # ⚠ The glob is VERSION-SCOPED. No pass runs `clean` on a reused workspace, so

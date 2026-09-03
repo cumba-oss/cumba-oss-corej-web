@@ -105,7 +105,7 @@ jobs:
       #
       # ⛔ The artifact NAME must stay `release-archives`: the release job below downloads
       #    exactly that name, and a mismatch fails at download — BEFORE the signing steps,
-      #    so it does NOT look like a GPG problem. Measured on cumba-oss-cdisc-rules
+      #    so it does NOT look like a GPG problem. Measured on cumba-oss-corej-rules
       #    2026-09-03: that repo's Gitea build still uploaded `release-jars` after its
       #    GitHub twin had moved to archives, and v0.2.0 went red one second in.
       # ⚠ The glob is VERSION-SCOPED, and if-no-files-found: error, because this release
@@ -148,7 +148,7 @@ jobs:
     # dash — it has no `pipefail` and no `shopt`, both of which the signing steps below
     # use. GitHub defaults to bash, so this divergence is invisible in the .github file
     # and fails ONLY here.
-    #   Measured 2026-09-03, cumba-oss-cdisc-rules v0.2.1:
+    #   Measured 2026-09-03, cumba-oss-corej-rules v0.2.1:
     #   "/var/run/act/workflow/1.sh: 2: set: Illegal option -o pipefail"
     # The `build` job above already declares this; the release job was simply missed.
     defaults:
@@ -192,7 +192,7 @@ jobs:
       #    loopback pinentry because a runner has no tty; without it gpg hangs.
       #
       # ⚠ UNVERIFIED AS OF 2026-09-03: whether `gpg` exists in the build image at all.
-      #    Every other cumba-oss Gitea workflow signs nothing, and cumba-oss-cdisc-rules
+      #    Every other cumba-oss Gitea workflow signs nothing, and cumba-oss-corej-rules
       #    — the only one that does — has never got past its download step, so this image
       #    has never had to provide gpg. The preflight below turns a bare
       #    "gpg: command not found" at the end of the job into a named cause. If it
