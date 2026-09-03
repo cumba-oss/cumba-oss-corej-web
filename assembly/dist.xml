@@ -2,7 +2,7 @@
 <!--
     The built validator SPA, as one zip.
 
-    ⚠ The <directory> below is GENERATED (web/cumba-oss-corej-web/dist, from `vite build`) and
+    ⚠ The <directory> below is GENERATED (dist, from `vite build`) and
     is not committed. An assembly fileSet whose directory does not exist is SILENTLY
     skipped, which would ship a green, empty archive — the enforcer rule in this module's
     pom exists solely to turn that into a named failure before this descriptor runs.
@@ -23,11 +23,11 @@
 
     <fileSets>
         <fileSet>
-            <directory>${maven.multiModuleProjectDirectory}/web/cumba-oss-corej-web/dist</directory>
+            <directory>${project.basedir}/dist</directory>
             <outputDirectory>/</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>${project.basedir}/src/main/resources</directory>
+            <directory>${project.basedir}/assembly</directory>
             <outputDirectory>/</outputDirectory>
             <includes>
                 <include>README.md</include>

@@ -67,12 +67,12 @@ const check = process.argv.slice(2).includes("--check");
 /**
  * Module-relative path of the generated file, for messages and git commands.
  *
- * ⚠ Was repository-relative ("clients/corej-cdisc-web/src/api/schema.d.ts") in the
+ * ⚠ Was repository-relative twice over: "clients/corej-cdisc-web/..." in the
  * monorepo. This module is now its own repository, so that prefix would have printed
  * `git add` advice naming a directory that does not exist — a broken instruction in the
  * one message a reader follows verbatim.
  */
-const OUTPUT_REL = "web/cumba-oss-corej-web/src/api/schema.d.ts";
+const OUTPUT_REL = "src/api/schema.d.ts";
 
 /** Explicit, loud opt-out. Set to "off" only where git genuinely cannot be run. */
 const OPT_OUT = "COREJ_SCHEMA_DRIFT_CHECK";

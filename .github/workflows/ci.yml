@@ -64,14 +64,14 @@ jobs:
           cache: maven
 
       # Node is NOT installed here on purpose. frontend-maven-plugin downloads the
-      # version pinned in web/cumba-oss-corej-web/pom.xml into that module's target/, so the
+      # version pinned in pom.xml into target/, so the
       # build uses the same Node locally and on every runner. Installing another one
       # here would put a second, unpinned Node ahead of it on PATH.
       - name: Cache npm
         uses: actions/cache@v4
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-npm-${{ hashFiles('web/cumba-oss-corej-web/package-lock.json') }}
+          key: ${{ runner.os }}-npm-${{ hashFiles('package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-npm-
 
@@ -107,7 +107,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
-          path: web/cumba-oss-corej-web/coverage/**
+          path: coverage/**
           if-no-files-found: warn
           retention-days: 7
 
@@ -128,7 +128,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: release-archives
-          path: dist/*-dist/target/*-${{ steps.ver.outputs.version }}.zip
+          # ⚠ target/, not dist/*-dist/target/. Single module now: the assembly writes
+          #   into this repo's own target/. upload-artifact only WARNS on a no-match.
+          path: target/*-${{ steps.ver.outputs.version }}.zip
           if-no-files-found: error
           retention-days: 2
 

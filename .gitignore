@@ -2,40 +2,42 @@
 #
 # Primary .gitignore for cumba-oss-corej-web.
 #
-# ⛔ DO NOT add a bare `dist/` here. In this repository `dist/` is a MAVEN
-#    MODULE DIRECTORY (dist/cumba-oss-corej-web-dist) that must be committed. The
-#    SPA's vite output is web/cumba-oss-corej-web/dist and is ignored by that
-#    module's own .gitignore, which is correctly scoped to it.
+# ⚠ THIS RULE INVERTED WHEN THE REPO WAS FLATTENED. It previously said "DO NOT add a
+#   bare dist/", because dist/ was a MAVEN MODULE DIRECTORY that had to be committed
+#   while the SPA's vite output lived at web/cumba-oss-corej-web/dist.
+#
+#   There is one module now. dist/ is ONLY the vite output, and a bare rule is exactly
+#   right. The Maven assembly descriptors live in assembly/, which IS committed —
+#   do not ignore that one.
 #
 #################
 
+# Vite build output — the release archive is assembled FROM this, never committed.
+/dist/
+
 # Node
-**/node_modules/
+node_modules/
 
 # Maven
-**/target/
+target/
+.flattened-pom.xml
 
-# Vite/vitest output inside the SPA module (belt and braces; the module's own
-# .gitignore covers these, and its scoping is what keeps them off dist/).
-/web/cumba-oss-corej-web/dist/
-/web/cumba-oss-corej-web/coverage/
+# Vitest coverage
+coverage/
 
 # Editors
-**/.settings/
-**/.project
-**/.classpath
-**/.idea/
-**/*.iml
-**/.vscode/
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
 
 # OS-level cruft
-**/.DS_Store
+.DS_Store
 
 # Claude Code working dir
-**/.claude
+.claude
 
-# .env files (any module / sub-dir)
-**/.env
-
-# flattened pom output (flatten-maven-plugin)
-**/.flattened-pom.xml
+# .env files
+.env
