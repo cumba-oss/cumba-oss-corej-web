@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!--
+        ============================================================
+        cumba-oss-web — the CDISC validator SPA.
+
+        ⚠ THIS PARENT IS DELIBERATELY SLIM, and is the one OSS repo
+        whose root pom is not the shared Java scaffold.
+
+        Every other cumba-oss repo inherits a ~2000-line parent
+        carrying the Java gate stack: PMD, SpotBugs, JaCoCo, Error
+        Prone/NullAway, Lombok, the Eclipse formatter, Pitest and the
+        Central publishing plugins, plus the five repo-root config
+        files those read. THIS REPOSITORY CONTAINS NO JAVA AT ALL —
+        one React/TypeScript module and an assembly — so all of that
+        would be configuration that can never fire, and five config
+        files a reader of a React repo would have to explain away.
+
+        What replaced it: frontend-maven-plugin drives the npm gate
+        chain (prettier + eslint + tsc + vitest + vite build), and
+        Maven contributes only the reactor, the pinned Node, the
+        release assembly and ${revision}.
+
+        ⚠ The module pom under web/ stays near-identical to its
+        monorepo twin (clients/corej-cdisc-web) so a Phase 06c
+        re-sync remains a file copy: the skip-properties it sets for
+        the internal parent's Java gates (spotbugs.skip, pmd.skip,
+        jacoco.skip) are simply harmless no-ops here, because those
+        plugins are not configured at all.
+        ============================================================
+    -->
+    <groupId>net.cumba</groupId>
+    <artifactId>cumba-oss-web-parent</artifactId>
+    <packaging>pom</packaging>
+    <version>${revision}</version>
+
+    <properties>
+        <general.encoding>UTF-8</general.encoding>
+        <project.build.sourceEncoding>${general.encoding}</project.build.sourceEncoding>
+        <project.build.reportEncoding>${general.encoding}</project.build.reportEncoding>
+
+        <!-- project.basedir requires 3.9.12+ -->
+        <maven.version>3.9.12</maven.version>
+        <!-- revision should be set externally; this is just a fallback -->
+        <revision>0.1.0-SNAPSHOT</revision>
+
+        <!--
+            ⛔ NOTHING IN THIS REPOSITORY IS PUBLISHED AS A MAVEN ARTIFACT —
+            not to Maven Central, not to the internal Nexus. Both modules are
+            packaging=pom; the deliverable is the built SPA, shipped as a signed
+            release archive (runbook Phase 06b). Set here on the parent so it is
+            inherited rather than repeated, and so a new module cannot forget it.
+        -->
+        <maven.deploy.skip>true</maven.deploy.skip>
+
+        <!-- Pinned to the same versions the other OSS repos use. -->
+        <plugin.frontend-maven-plugin.version>2.0.2</plugin.frontend-maven-plugin.version>
+        <plugin.maven-enforcer-plugin.version>3.6.3</plugin.maven-enforcer-plugin.version>
+        <plugin.maven-assembly-plugin.version>3.8.0</plugin.maven-assembly-plugin.version>
+        <plugin.flatten-maven-plugin.version>1.8.0</plugin.flatten-maven-plugin.version>
+    </properties>
+
+    <modules>
+        <module>web/cumba-oss-web</module>
+        <module>dist/cumba-oss-web-dist</module>
+    </modules>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>com.github.eirslett</groupId>
+                    <artifactId>frontend-maven-plugin</artifactId>
+                    <version>${plugin.frontend-maven-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>${plugin.maven-enforcer-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>${plugin.maven-assembly-plugin.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+            <!--
+                Enforce the Maven floor once, at the root. ${project.basedir} in a
+                <requireFilesExist> message and the CI-friendly ${revision} handling
+                below both need 3.9.12+.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>enforce-maven</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>[${maven.version},)</version>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!--
+                ${revision} is a CI-friendly version placeholder. Without flatten the
+                literal string "${revision}" would be written into any installed pom.
+                resolveCiFriendliesOnly touches nothing else.
+            -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>${plugin.flatten-maven-plugin.version}</version>
+                <configuration>
+                    <updatePomFile>true</updatePomFile>
+                    <flattenMode>resolveCiFriendliesOnly</flattenMode>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>flatten</id>
+                        <phase>process-resources</phase>
+                        <goals><goal>flatten</goal></goals>
+                    </execution>
+                    <execution>
+                        <id>flatten.clean</id>
+                        <phase>clean</phase>
+                        <goals><goal>clean</goal></goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <name>Cumba OSS Web</name>
+    <description>Single-page web UI (React + TypeScript + Vite) over the coreJ CDISC validation REST API.</description>
+    <inceptionYear>2026</inceptionYear>
+    <!--
+        Points at the PUBLIC GitHub mirror, not the internal Gitea origin, because
+        it must resolve for anyone reading the project. Nothing here reaches Maven
+        Central, so these are good practice rather than a hard requirement
+        (runbook Phase 06b) — they cost nothing and answer "where did this come
+        from" for a reader of a release archive.
+    -->
+    <url child.project.url.inherit.append.path="false">https://github.com/cumba-oss/cumba-oss-web</url>
+    <organization>
+        <name>P300</name>
+        <url>https://www.p-300.com</url>
+    </organization>
+
+    <licenses>
+        <license>
+            <name>AGPL-3.0-only</name>
+            <url>https://www.gnu.org/licenses/agpl-3.0.txt</url>
+            <distribution>repo</distribution>
+            <comments>Licensed under the GNU Affero General Public License, version 3</comments>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Michael Weiss</name>
+            <email>mw@p-300.com</email>
+            <organization>P300</organization>
+            <organizationUrl>https://www.p-300.com</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm child.scm.url.inherit.append.path="false"
+         child.scm.connection.inherit.append.path="false"
+         child.scm.developerConnection.inherit.append.path="false">
+        <connection>scm:git:https://github.com/cumba-oss/cumba-oss-web.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/cumba-oss/cumba-oss-web.git</developerConnection>
+        <url>https://github.com/cumba-oss/cumba-oss-web</url>
+        <tag>HEAD</tag>
+    </scm>
+
+</project>

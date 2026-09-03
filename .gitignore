@@ -1,0 +1,41 @@
+#################
+#
+# Primary .gitignore for cumba-oss-web.
+#
+# ⛔ DO NOT add a bare `dist/` here. In this repository `dist/` is a MAVEN
+#    MODULE DIRECTORY (dist/cumba-oss-web-dist) that must be committed. The
+#    SPA's vite output is web/cumba-oss-web/dist and is ignored by that
+#    module's own .gitignore, which is correctly scoped to it.
+#
+#################
+
+# Node
+**/node_modules/
+
+# Maven
+**/target/
+
+# Vite/vitest output inside the SPA module (belt and braces; the module's own
+# .gitignore covers these, and its scoping is what keeps them off dist/).
+/web/cumba-oss-web/dist/
+/web/cumba-oss-web/coverage/
+
+# Editors
+**/.settings/
+**/.project
+**/.classpath
+**/.idea/
+**/*.iml
+**/.vscode/
+
+# OS-level cruft
+**/.DS_Store
+
+# Claude Code working dir
+**/.claude
+
+# .env files (any module / sub-dir)
+**/.env
+
+# flattened pom output (flatten-maven-plugin)
+**/.flattened-pom.xml

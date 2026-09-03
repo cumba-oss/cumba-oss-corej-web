@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>net.cumba</groupId>
+        <artifactId>cumba-oss-web-parent</artifactId>
+        <version>${revision}</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>cumba-oss-web</artifactId>
+    <packaging>pom</packaging>
+
+    <name>Cumba OSS Web :: SPA</name>
+    <url>https://github.com/cumba-oss/cumba-oss-web</url>
+    <inceptionYear>2026</inceptionYear>
+    <description>
+        Single-page web UI (React + TypeScript + Vite) over the coreJ CDISC
+        validation REST API. A no-Java module: frontend-maven-plugin binds
+        npm ci / gen:api / verify (prettier + eslint + tsc + vitest + vite
+        build) into the Maven lifecycle. Its typed API client is generated
+        from the REST API's OpenAPI spec.
+
+        ⚠ The REST API is NOT in this repository — it is cumba-oss-cdisc-rest
+        in the cumba-oss-clients repo. See scripts/gen-api.mjs for how the
+        contract crosses that boundary.
+    </description>
+
+    <properties>
+        <!--
+            ⚠ INERT HERE, KEPT ON PURPOSE. This repository's parent configures
+            no Java gates at all (see the root pom), so these skips suppress
+            nothing. They are retained so this file stays a byte-for-byte
+            re-sync target against its monorepo twin, clients/corej-cdisc-web,
+            whose parent DOES bind PMD / SpotBugs / JaCoCo to every module and
+            where they are load-bearing — that module ships no Java sources
+            either, so the Java gates have nothing to analyse and actively fail
+            or waste time on an empty source tree.
+
+            Deleting them here would make every future Phase 06c sync a manual
+            three-way merge to save four lines that cost nothing.
+        -->
+        <spotbugs.skip>true</spotbugs.skip>
+        <pmd.skip>true</pmd.skip>
+        <jacoco.skip>true</jacoco.skip>
+        <!-- pom aggregator (the SPA build); nothing to publish. -->
+        <maven.deploy.skip>true</maven.deploy.skip>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.github.eirslett</groupId>
+                <artifactId>frontend-maven-plugin</artifactId>
+                <configuration>
+                    <nodeVersion>v24.16.0</nodeVersion>
+                    <installDirectory>target</installDirectory>
+                </configuration>
+                <executions>
+                    <!-- Install a pinned Node + npm under target/ (local dev). CI can
+                         reuse a container Node by pointing nodeDownloadRoot/npmRegistryURL
+                         at a mirror or skipping this execution when Node is on PATH.
+                         Bound to initialize so Node + deps exist before gen:api: note
+                         the Maven lifecycle runs generate-sources BEFORE generate-resources,
+                         so the install/ci must precede generate-sources. -->
+                    <execution>
+                        <id>install-node-and-npm</id>
+                        <goals>
+                            <goal>install-node-and-npm</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                    </execution>
+                    <!-- Reproducible install from the committed package-lock.json. -->
+                    <execution>
+                        <id>npm-ci</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                        <configuration>
+                            <arguments>ci</arguments>
+                        </configuration>
+                    </execution>
+                    <!-- Generate src/api/schema.d.ts from the committed openapi.snapshot.json,
+                         or from a spec named explicitly via -Dopenapi.spec.file / OPENAPI_SPEC
+                         (see scripts/gen-api.mjs).
+
+                         `gen:api:check` is `gen:api` plus a `git diff` of the regenerated
+                         file against the version git has, and fails the build when they
+                         differ. Without it this generate-sources execution silently
+                         overwrites the committed schema.d.ts on every build, leaving only
+                         an unstaged diff nobody has to notice. Plain `npm run gen:api`,
+                         without the check flag, keeps the rewrite behaviour and remains the
+                         documented way to fix a reported drift.
+
+                         ⚠ In the monorepo the other half of this guard was
+                         OpenApiSnapshotDriftTest in clients/corej-cdisc-rest, which pinned
+                         the snapshot against the live spec. That test could not survive the
+                         repo split and was removed from cumba-oss-clients — so within THIS
+                         repo `gen:api:check` proves only that schema.d.ts matches the
+                         committed snapshot, NOT that the snapshot matches the API. See the
+                         README's "The API contract" section. -->
+                    <execution>
+                        <id>gen-api</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <arguments>run gen:api:check</arguments>
+                        </configuration>
+                    </execution>
+                    <!-- Frontend quality gate: prettier-check + eslint + tsc + vitest coverage + vite build. -->
+                    <execution>
+                        <id>verify</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <phase>verify</phase>
+                        <configuration>
+                            <arguments>run verify</arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
