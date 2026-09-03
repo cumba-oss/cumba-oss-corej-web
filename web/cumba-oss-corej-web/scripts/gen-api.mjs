@@ -72,7 +72,7 @@ const check = process.argv.slice(2).includes("--check");
  * `git add` advice naming a directory that does not exist — a broken instruction in the
  * one message a reader follows verbatim.
  */
-const OUTPUT_REL = "web/cumba-oss-web/src/api/schema.d.ts";
+const OUTPUT_REL = "web/cumba-oss-corej-web/src/api/schema.d.ts";
 
 /** Explicit, loud opt-out. Set to "off" only where git genuinely cannot be run. */
 const OPT_OUT = "COREJ_SCHEMA_DRIFT_CHECK";

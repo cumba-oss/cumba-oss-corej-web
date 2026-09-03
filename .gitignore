@@ -1,10 +1,10 @@
 #################
 #
-# Primary .gitignore for cumba-oss-web.
+# Primary .gitignore for cumba-oss-corej-web.
 #
 # ⛔ DO NOT add a bare `dist/` here. In this repository `dist/` is a MAVEN
-#    MODULE DIRECTORY (dist/cumba-oss-web-dist) that must be committed. The
-#    SPA's vite output is web/cumba-oss-web/dist and is ignored by that
+#    MODULE DIRECTORY (dist/cumba-oss-corej-web-dist) that must be committed. The
+#    SPA's vite output is web/cumba-oss-corej-web/dist and is ignored by that
 #    module's own .gitignore, which is correctly scoped to it.
 #
 #################
@@ -17,8 +17,8 @@
 
 # Vite/vitest output inside the SPA module (belt and braces; the module's own
 # .gitignore covers these, and its scoping is what keeps them off dist/).
-/web/cumba-oss-web/dist/
-/web/cumba-oss-web/coverage/
+/web/cumba-oss-corej-web/dist/
+/web/cumba-oss-corej-web/coverage/
 
 # Editors
 **/.settings/

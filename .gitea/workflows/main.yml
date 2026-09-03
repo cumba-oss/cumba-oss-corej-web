@@ -33,7 +33,7 @@ jobs:
     outputs:
       version: ${{ steps.ver.outputs.version }}
     env:
-      # ⚠ LOAD-BEARING, and referenced by name from web/cumba-oss-web/vite.config.ts.
+      # ⚠ LOAD-BEARING, and referenced by name from web/cumba-oss-corej-web/vite.config.ts.
       # The jsdom suite is heavy; uncapped, vitest starts one worker per CPU and
       # saturates the runner host. A saturated host stalls the Docker daemon, and
       # act_runner's post-step container-archive copy then times out with
@@ -63,7 +63,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-npm-${{ hashFiles('web/cumba-oss-web/package-lock.json') }}
+          key: ${{ runner.os }}-npm-${{ hashFiles('web/cumba-oss-corej-web/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-npm-
 
@@ -128,7 +128,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: coverage-report
-          path: web/cumba-oss-web/coverage/**
+          path: web/cumba-oss-corej-web/coverage/**
           if-no-files-found: warn
           retention-days: 7
 
@@ -162,7 +162,7 @@ jobs:
         if: always()
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-npm-${{ hashFiles('web/cumba-oss-web/package-lock.json') }}
+          key: ${{ runner.os }}-npm-${{ hashFiles('web/cumba-oss-corej-web/package-lock.json') }}
 
   # Cut the release LAST — only after the gate passed. A separate job (rather than a
   # step in `build`) is what makes that ordering a hard guarantee.

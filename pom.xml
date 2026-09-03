@@ -5,7 +5,7 @@
 
     <!--
         ============================================================
-        cumba-oss-web — the CDISC validator SPA.
+        cumba-oss-corej-web — the CDISC validator SPA.
 
         ⚠ THIS PARENT IS DELIBERATELY SLIM, and is the one OSS repo
         whose root pom is not the shared Java scaffold.
@@ -33,7 +33,7 @@
         ============================================================
     -->
     <groupId>net.cumba</groupId>
-    <artifactId>cumba-oss-web-parent</artifactId>
+    <artifactId>cumba-oss-corej-web-parent</artifactId>
     <packaging>pom</packaging>
     <version>${revision}</version>
 
@@ -64,8 +64,8 @@
     </properties>
 
     <modules>
-        <module>web/cumba-oss-web</module>
-        <module>dist/cumba-oss-web-dist</module>
+        <module>web/cumba-oss-corej-web</module>
+        <module>dist/cumba-oss-corej-web-dist</module>
     </modules>
 
     <build>
@@ -144,7 +144,7 @@
         </plugins>
     </build>
 
-    <name>Cumba OSS Web</name>
+    <name>Cumba OSS coreJ Web</name>
     <description>Single-page web UI (React + TypeScript + Vite) over the coreJ CDISC validation REST API.</description>
     <inceptionYear>2026</inceptionYear>
     <!--
@@ -154,7 +154,7 @@
         (runbook Phase 06b) — they cost nothing and answer "where did this come
         from" for a reader of a release archive.
     -->
-    <url child.project.url.inherit.append.path="false">https://github.com/cumba-oss/cumba-oss-web</url>
+    <url child.project.url.inherit.append.path="false">https://github.com/cumba-oss/cumba-oss-corej-web</url>
     <organization>
         <name>P300</name>
         <url>https://www.p-300.com</url>
@@ -181,9 +181,9 @@
     <scm child.scm.url.inherit.append.path="false"
          child.scm.connection.inherit.append.path="false"
          child.scm.developerConnection.inherit.append.path="false">
-        <connection>scm:git:https://github.com/cumba-oss/cumba-oss-web.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/cumba-oss/cumba-oss-web.git</developerConnection>
-        <url>https://github.com/cumba-oss/cumba-oss-web</url>
+        <connection>scm:git:https://github.com/cumba-oss/cumba-oss-corej-web.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/cumba-oss/cumba-oss-corej-web.git</developerConnection>
+        <url>https://github.com/cumba-oss/cumba-oss-corej-web</url>
         <tag>HEAD</tag>
     </scm>
 

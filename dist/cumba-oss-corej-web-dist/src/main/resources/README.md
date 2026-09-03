@@ -19,7 +19,7 @@ repository, can bundle these files into its own jar so the API serves the UI at 
 same origin — which also removes the CORS question entirely:
 
 ```bash
-unzip cumba-oss-web-<version>.zip -d ./web-dist
+unzip cumba-oss-corej-web-<version>.zip -d ./web-dist
 mvn -pl clients/cumba-oss-cdisc-rest -Pbundle-web clean package -Dweb.dist.dir=$PWD/web-dist
 ```
 
@@ -31,7 +31,7 @@ with write access to the repository, so unlike an immutable Central artifact the
 is the only thing standing between you and a swapped file. Check it:
 
 ```bash
-gpg --verify cumba-oss-web-<version>.zip.asc cumba-oss-web-<version>.zip
+gpg --verify cumba-oss-corej-web-<version>.zip.asc cumba-oss-corej-web-<version>.zip
 ```
 
 Key fingerprint: `AE5AA7685BED3FC5DF4AE8DD7727EF25F931AF6B`

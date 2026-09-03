@@ -6,16 +6,16 @@
 
     <parent>
         <groupId>net.cumba</groupId>
-        <artifactId>cumba-oss-web-parent</artifactId>
+        <artifactId>cumba-oss-corej-web-parent</artifactId>
         <version>${revision}</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>cumba-oss-web</artifactId>
+    <artifactId>cumba-oss-corej-web</artifactId>
     <packaging>pom</packaging>
 
-    <name>Cumba OSS Web :: SPA</name>
-    <url>https://github.com/cumba-oss/cumba-oss-web</url>
+    <name>Cumba OSS coreJ Web :: SPA</name>
+    <url>https://github.com/cumba-oss/cumba-oss-corej-web</url>
     <inceptionYear>2026</inceptionYear>
     <description>
         Single-page web UI (React + TypeScript + Vite) over the coreJ CDISC

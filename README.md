@@ -1,4 +1,4 @@
-# cumba-oss-web
+# cumba-oss-corej-web
 
 The **CDISC validator SPA** — a React + TypeScript + Vite single-page UI over the coreJ
 CDISC validation REST API. Create a session, upload study files, start a check run, and
@@ -10,12 +10,12 @@ Part of the [cumba-oss](https://github.com/cumba-oss) set. The API it talks to i
 ## Layout
 
 ```
-web/cumba-oss-web/         the SPA (React + TypeScript + Vite)
-dist/cumba-oss-web-dist/   packages the built site into the release archive
+web/cumba-oss-corej-web/         the SPA (React + TypeScript + Vite)
+dist/cumba-oss-corej-web-dist/   packages the built site into the release archive
 ```
 
 ⚠ `dist/` at the repository root is a **Maven module directory** and is committed. The
-SPA's build output is `web/cumba-oss-web/dist` and is not. Do not add a bare `dist/` to
+SPA's build output is `web/cumba-oss-corej-web/dist` and is not. Do not add a bare `dist/` to
 the root `.gitignore`.
 
 ## Building
@@ -34,7 +34,7 @@ prettier --check  →  eslint  →  tsc --noEmit  →  vitest (coverage threshol
 Working on the UI alone is faster straight through npm:
 
 ```bash
-cd web/cumba-oss-web
+cd web/cumba-oss-corej-web
 npm ci
 npm run dev        # vite dev server, proxying /api to http://localhost:8080
 npm run verify     # the same chain the Maven build runs
@@ -65,7 +65,7 @@ rewrite `schema.d.ts` silently on each run and leave only an unstaged diff nobod
 notice. To fix a reported drift, run the plain generator and stage the result:
 
 ```bash
-cd web/cumba-oss-web
+cd web/cumba-oss-corej-web
 npm run gen:api
 git add src/api/schema.d.ts
 ```
@@ -100,7 +100,7 @@ answered by a human. Treat a REST API change as requiring a deliberate snapshot 
 Tagging `vX.Y.Z` builds, signs and publishes one asset:
 
 ```
-cumba-oss-web-<version>.zip     the built static site (index.html + assets/)
+cumba-oss-corej-web-<version>.zip     the built static site (index.html + assets/)
 ```
 
 ⛔ **Nothing in this repository is published to Maven Central**, or to any Maven repository.
@@ -115,7 +115,7 @@ between you and a swapped file:
 
 ```bash
 curl -sLO <asset-url> && curl -sLO <asset-url>.asc
-gpg --verify cumba-oss-web-<version>.zip.asc cumba-oss-web-<version>.zip
+gpg --verify cumba-oss-corej-web-<version>.zip.asc cumba-oss-corej-web-<version>.zip
 ```
 
 Key fingerprint: `AE5AA7685BED3FC5DF4AE8DD7727EF25F931AF6B`
@@ -126,7 +126,7 @@ Key fingerprint: `AE5AA7685BED3FC5DF4AE8DD7727EF25F931AF6B`
 at `/` — same origin, and no CORS configuration:
 
 ```bash
-unzip cumba-oss-web-<version>.zip -d ./web-dist
+unzip cumba-oss-corej-web-<version>.zip -d ./web-dist
 mvn -pl clients/cumba-oss-cdisc-rest -Pbundle-web clean package -Dweb.dist.dir=$PWD/web-dist
 ```
 
