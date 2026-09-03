@@ -144,6 +144,16 @@ jobs:
       # runtime; the bare runner host has none. Reuse the node-bearing build image —
       # heavier than needed, but already pullable, no new dependency.
       image: ${{ vars.DOCKER_REGISTRY_HOSTNAME }}/maven-with-nodejs:3.9-eclipse-temurin-25
+    # ⛔ bash, EXPLICITLY. Gitea's act_runner defaults a job's steps to `sh -e`, which is
+    # dash — it has no `pipefail` and no `shopt`, both of which the signing steps below
+    # use. GitHub defaults to bash, so this divergence is invisible in the .github file
+    # and fails ONLY here.
+    #   Measured 2026-09-03, cumba-oss-cdisc-rules v0.2.1:
+    #   "/var/run/act/workflow/1.sh: 2: set: Illegal option -o pipefail"
+    # The `build` job above already declares this; the release job was simply missed.
+    defaults:
+      run:
+        shell: bash
     steps:
       - name: Download release archives
         uses: actions/download-artifact@v3
