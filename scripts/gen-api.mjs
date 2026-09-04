@@ -4,9 +4,9 @@
 // builds hermetically — no network, no running API, reproducible.
 //
 // ⚠ In the monorepo this preferred a LIVE spec at the sibling path
-// ../corej-cdisc-rest/target/openapi.json, dumped by the REST module's
+// ../corej-rest/target/openapi.json, dumped by the REST module's
 // `generate-openapi` profile. That module now lives in a different repository
-// (cumba-oss-cdisc-rest, in cumba-oss-clients), so the relative path can never
+// of its own (cumba-oss-corej-rest), so the relative path can never
 // resolve again. Left as-is it would not have failed: it would have silently
 // taken the fallback forever, and the "types track the running app" property
 // would have been quietly untrue.
@@ -67,7 +67,7 @@ const check = process.argv.slice(2).includes("--check");
 /**
  * Module-relative path of the generated file, for messages and git commands.
  *
- * ⚠ Was repository-relative twice over: "clients/corej-cdisc-web/..." in the
+ * ⚠ Was repository-relative twice over: "clients/corej-web/..." in the
  * monorepo. This module is now its own repository, so that prefix would have printed
  * `git add` advice naming a directory that does not exist — a broken instruction in the
  * one message a reader follows verbatim.
@@ -134,7 +134,7 @@ function sourceAdvice() {
     "",
     "  ⚠ Nothing in this repository can tell you whether that spec is the CURRENT published",
     "  contract. The monorepo's other half of this guard, OpenApiSnapshotDriftTest in",
-    "  clients/corej-cdisc-rest, pinned the snapshot against the live spec and could not",
+    "  clients/corej-rest, pinned the snapshot against the live spec and could not",
     '  survive the repo split. See the README\'s "The API contract" section.',
   ];
 }

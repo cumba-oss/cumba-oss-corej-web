@@ -4,7 +4,7 @@
 # the three things that deliberately differ between the two; do not "unify" them.
 #
 # ⛔ THIS REPOSITORY DEPLOYS NO MAVEN ARTIFACTS — not to Central, not to the internal
-# Nexus. Both modules are packaging=pom and the deliverable is the built SPA. There is
+# Nexus. The single module is packaging=pom and the deliverable is the built SPA. There is
 # therefore no deploy job here, unlike every other cumba-oss repo's Gitea workflow.
 #
 # ⚠ No Sonar pass either: the shared Sonar configuration is Java-shaped (JaCoCo exec

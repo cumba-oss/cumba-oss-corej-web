@@ -16,7 +16,7 @@
     </formats>
     <!--
         false: the archive's root IS the site root, so unzipping gives a directory that
-        can be served, or handed straight to cumba-oss-cdisc-rest's
+        can be served, or handed straight to cumba-oss-corej-rest's
         -Dweb.dist.dir. A wrapper directory would break both.
     -->
     <includeBaseDirectory>false</includeBaseDirectory>

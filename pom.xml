@@ -21,13 +21,13 @@
 
         What replaced it: frontend-maven-plugin drives the npm gate
         chain (prettier + eslint + tsc + vitest + vite build), and
-        Maven contributes only the reactor, the pinned Node, the
-        release assembly and ${revision}.
+        Maven contributes only the pinned Node, the release assembly
+        and ${revision}.
 
-        ⚠ The module pom under web/ stays near-identical to its
-        monorepo twin (clients/corej-cdisc-web) so a Phase 06c
-        re-sync remains a file copy: the skip-properties it sets for
-        the internal parent's Java gates (spotbugs.skip, pmd.skip,
+        ⚠ The frontend-maven-plugin block below stays near-identical
+        to its monorepo twin, clients/corej-web, so a Phase 06c
+        re-sync stays a near-copy: the skip-properties that twin sets
+        for the internal parent's Java gates (spotbugs.skip, pmd.skip,
         jacoco.skip) are simply harmless no-ops here, because those
         plugins are not configured at all.
         ============================================================
@@ -49,10 +49,11 @@
 
         <!--
             ⛔ NOTHING IN THIS REPOSITORY IS PUBLISHED AS A MAVEN ARTIFACT —
-            not to Maven Central, not to the internal Nexus. Both modules are
-            packaging=pom; the deliverable is the built SPA, shipped as a signed
-            release archive (runbook Phase 06b). Set here on the parent so it is
-            inherited rather than repeated, and so a new module cannot forget it.
+            not to Maven Central, not to the internal Nexus. This is a single
+            module with packaging=pom; the deliverable is the built SPA, shipped
+            as a signed release archive (runbook Phase 06b). Set at the top of
+            the file so any module added later inherits it rather than having to
+            remember it.
         -->
         <maven.deploy.skip>true</maven.deploy.skip>
 
@@ -63,14 +64,14 @@
         <plugin.flatten-maven-plugin.version>1.8.0</plugin.flatten-maven-plugin.version>
         <!-- ===== From the former SPA module pom. ===== -->
         <!--
-            ⚠ INERT HERE, KEPT ON PURPOSE. This repository's parent configures
-            no Java gates at all (see the root pom), so these skips suppress
-            nothing. They are retained so this file stays a byte-for-byte
-            re-sync target against its monorepo twin, clients/corej-cdisc-web,
-            whose parent DOES bind PMD / SpotBugs / JaCoCo to every module and
-            where they are load-bearing — that module ships no Java sources
-            either, so the Java gates have nothing to analyse and actively fail
-            or waste time on an empty source tree.
+            ⚠ INERT HERE, KEPT ON PURPOSE. This repository configures no Java
+            gates at all (see the comment at the top of this file), so these
+            skips suppress nothing. They are retained so this file stays a
+            near-copy re-sync target against its monorepo twin,
+            clients/corej-web, whose parent DOES bind PMD / SpotBugs / JaCoCo to
+            every module and where they are load-bearing — that module ships no
+            Java sources either, so the Java gates have nothing to analyse and
+            actively fail or waste time on an empty source tree.
 
             Deleting them here would make every future Phase 06c sync a manual
             three-way merge to save four lines that cost nothing.
@@ -162,7 +163,7 @@
                          documented way to fix a reported drift.
 
                          ⚠ In the monorepo the other half of this guard was
-                         OpenApiSnapshotDriftTest in clients/corej-cdisc-rest, which pinned
+                         OpenApiSnapshotDriftTest in clients/corej-rest, which pinned
                          the snapshot against the live spec. That test could not survive the
                          repo split and was removed from cumba-oss-clients — so within THIS
                          repo `gen:api:check` proves only that schema.d.ts matches the

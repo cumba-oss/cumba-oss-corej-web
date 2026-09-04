@@ -1,8 +1,10 @@
-# Cumba OSS Web — built validator SPA
+# Cumba OSS coreJ Web — built validator SPA
 
 This archive is the **built** single-page CDISC validator UI: static files only, no build
-step and no Node toolchain required. Unzipping it gives you the site root
-(`index.html` plus `assets/`), not a wrapper directory.
+step and no Node toolchain required. Unzipping it gives you the site root (`index.html`,
+`assets/` and this README), not a wrapper directory.
+
+Source, issues and the build: [cumba-oss-corej-web](https://github.com/cumba-oss/cumba-oss-corej-web).
 
 ## Serving it
 
@@ -14,14 +16,21 @@ serve it from the same origin as the API, or put both behind one reverse proxy.
 
 ## Serving it from the API itself (one deployable)
 
-`cumba-oss-cdisc-rest`, in the [cumba-oss-clients](https://github.com/cumba-oss/cumba-oss-clients)
-repository, can bundle these files into its own jar so the API serves the UI at `/` on the
-same origin — which also removes the CORS question entirely:
+[`cumba-oss-corej-rest`](https://github.com/cumba-oss/cumba-oss-corej-rest) can bundle
+these files into its own jar so the API serves the UI at `/` on the same origin — which
+also removes the CORS question entirely. Its opt-in `bundle-web` profile copies whatever
+`web.dist.dir` names into the jar's `static/`, and that repository is a single Maven
+module, so the build runs from its root:
 
 ```bash
-unzip cumba-oss-corej-web-<version>.zip -d ./web-dist
-mvn -pl clients/cumba-oss-cdisc-rest -Pbundle-web clean package -Dweb.dist.dir=$PWD/web-dist
+unzip cumba-oss-corej-web-<version>.zip -d /tmp/web-dist
+cd /path/to/cumba-oss-corej-rest
+mvn -Pbundle-web clean package -Dweb.dist.dir=/tmp/web-dist
 ```
+
+⚠ Give `web.dist.dir` an **absolute** path to a directory that exists. The profile's
+default deliberately points at a path that does not, and a `web.dist.dir` that is missing
+is *skipped with a warning* — you get a green build and an API-only jar, not an error.
 
 ## Verifying this archive
 

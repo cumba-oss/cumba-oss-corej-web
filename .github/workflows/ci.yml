@@ -17,8 +17,8 @@
 #   3. NO SONAR AND NO NEXUS DEPLOY. Those target internal hosts — and this
 #      repository deploys no Maven artifacts anywhere in any case.
 #
-# ⛔ THIS REPOSITORY PUBLISHES NOTHING TO MAVEN CENTRAL. Both modules are
-# packaging=pom and the deliverable is the built SPA, shipped as a signed
+# ⛔ THIS REPOSITORY PUBLISHES NOTHING TO MAVEN CENTRAL. The single module
+# is packaging=pom and the deliverable is the built SPA, shipped as a signed
 # release asset (runbook Phase 06b). There is deliberately no publish job.
 
 name: CI

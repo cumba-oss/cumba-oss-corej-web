@@ -5,18 +5,28 @@ CDISC validation REST API. Create a session, upload study files, start a check r
 page through the findings.
 
 Part of the [cumba-oss](https://github.com/cumba-oss) set. The API it talks to is
-`cumba-oss-cdisc-rest`, in [cumba-oss-clients](https://github.com/cumba-oss/cumba-oss-clients).
+[`cumba-oss-corej-rest`](https://github.com/cumba-oss/cumba-oss-corej-rest), in its own
+repository.
 
 ## Layout
 
-```
-web/cumba-oss-corej-web/         the SPA (React + TypeScript + Vite)
-dist/cumba-oss-corej-web-dist/   packages the built site into the release archive
-```
+One Maven module: the root `pom.xml` **is** the artifact (`packaging=pom`), and it drives
+the npm gate chain directly. There are no submodules.
 
-⚠ `dist/` at the repository root is a **Maven module directory** and is committed. The
-SPA's build output is `web/cumba-oss-corej-web/dist` and is not. Do not add a bare `dist/` to
-the root `.gitignore`.
+| Path | What it is |
+|---|---|
+| `src/` | the SPA (React + TypeScript + Vite) |
+| `scripts/gen-api.mjs` | generates `src/api/schema.d.ts` from the OpenAPI snapshot |
+| `openapi.snapshot.json` | the committed copy of the REST API's OpenAPI document |
+| `assembly/dist.xml` | descriptor for the release archive |
+| `assembly/README.md` | ships **inside** the release archive — write it for a consumer who just unzipped it, not for this repository |
+| `dist/` | `vite build` output: generated, git-ignored, and the input to the archive |
+
+⚠ **The `dist/` rule inverted when this repository was flattened.** In the old two-module
+layout `dist/` was a committed Maven *module* directory — a bare `dist/` ignore rule would
+have dropped it from git — and the SPA's build output lived under `web/`. There is one
+module now, `dist/` is only the vite output, and the `/dist/` rule in `.gitignore` is
+exactly right. `assembly/` is committed; do not widen the rule to cover it.
 
 ## Building
 
@@ -24,17 +34,23 @@ the root `.gitignore`.
 mvn -B clean verify          # the whole gate, exactly what CI runs
 ```
 
-Maven contributes only the reactor, a pinned Node, the release assembly and `${revision}`;
+`${revision}` falls back to `0.1.0-SNAPSHOT`. A release build sets it, and the archive is
+named from it:
+
+```bash
+mvn -B -Drevision=0.1.0 clean verify    # → target/cumba-oss-corej-web-0.1.0.zip
+```
+
+Maven contributes only a pinned Node, the release assembly and `${revision}`;
 `frontend-maven-plugin` runs the real gate:
 
 ```
 prettier --check  →  eslint  →  tsc --noEmit  →  vitest (coverage thresholds)  →  vite build
 ```
 
-Working on the UI alone is faster straight through npm:
+Working on the UI alone is faster straight through npm, from the repository root:
 
 ```bash
-cd web/cumba-oss-corej-web
 npm ci
 npm run dev        # vite dev server, proxying /api to http://localhost:8080
 npm run verify     # the same chain the Maven build runs
@@ -47,7 +63,7 @@ the `verify` phase, so the assembly is too — `verify` is the floor for produci
 
 The test suite reads **nothing** licensed or machine-specific: every HTTP call is
 intercepted by [MSW](https://mswjs.io/), and there are no external fixtures. The build
-does need public registries — Node from nodejs.org (version pinned in the module pom), npm
+does need public registries — Node from nodejs.org (version pinned in `pom.xml`), npm
 packages from registry.npmjs.org (pinned by `package-lock.json`), and Maven plugins from
 Central. It also needs a real **git checkout**, because the schema drift check below shells
 out to `git diff`; CI therefore checks out with `fetch-depth: 0`.
@@ -65,7 +81,6 @@ rewrite `schema.d.ts` silently on each run and leave only an unstaged diff nobod
 notice. To fix a reported drift, run the plain generator and stage the result:
 
 ```bash
-cd web/cumba-oss-corej-web
 npm run gen:api
 git add src/api/schema.d.ts
 ```
@@ -87,7 +102,7 @@ are committed as a pair.
 not, and cannot, tell you whether that snapshot is still the current published contract.
 
 In the monorepo the other half of the guard was `OpenApiSnapshotDriftTest` in
-`clients/corej-cdisc-rest`, which pinned the snapshot against the live generated spec. It
+`clients/corej-rest`, which pinned the snapshot against the live generated spec. It
 could not survive the split into two repositories and was removed from `cumba-oss-clients`.
 
 The agreed replacement — the REST API publishing its OpenAPI document as a real versioned
@@ -97,14 +112,15 @@ answered by a human. Treat a REST API change as requiring a deliberate snapshot 
 
 ## Releases
 
-Tagging `vX.Y.Z` builds, signs and publishes one asset:
+Tagging `vX.Y.Z` builds, signs and publishes one archive:
 
-```
-cumba-oss-corej-web-<version>.zip     the built static site (index.html + assets/)
-```
+| Asset | What it is |
+|---|---|
+| `cumba-oss-corej-web-<version>.zip` | the built static site — `index.html`, `assets/`, and `assembly/README.md` as the archive's own `README.md` |
+| `cumba-oss-corej-web-<version>.zip.asc` | its detached GPG signature |
 
 ⛔ **Nothing in this repository is published to Maven Central**, or to any Maven repository.
-Both modules are `packaging=pom`; the archive is the entire deliverable.
+The single module is `packaging=pom`; the archive is the entire deliverable.
 
 ### Verifying a release asset
 
@@ -122,13 +138,20 @@ Key fingerprint: `AE5AA7685BED3FC5DF4AE8DD7727EF25F931AF6B`
 
 ### Serving it with the API on one origin
 
-`cumba-oss-cdisc-rest` can bundle the built site into its own jar, so the API serves the UI
-at `/` — same origin, and no CORS configuration:
+[`cumba-oss-corej-rest`](https://github.com/cumba-oss/cumba-oss-corej-rest) can bundle the
+built site into its own jar, so the API serves the UI at `/` — same origin, and no CORS
+configuration. Its opt-in `bundle-web` profile copies whatever `web.dist.dir` names into
+the jar's `static/`. It is a single-module repository, so the build runs from its root:
 
 ```bash
-unzip cumba-oss-corej-web-<version>.zip -d ./web-dist
-mvn -pl clients/cumba-oss-cdisc-rest -Pbundle-web clean package -Dweb.dist.dir=$PWD/web-dist
+unzip cumba-oss-corej-web-<version>.zip -d /tmp/web-dist
+cd /path/to/cumba-oss-corej-rest
+mvn -Pbundle-web clean package -Dweb.dist.dir=/tmp/web-dist
 ```
+
+⚠ Give `web.dist.dir` an **absolute** path to a directory that exists. The profile's
+default deliberately points at a path that does not, and a `web.dist.dir` that is missing
+is *skipped with a warning* — you get a green build and an API-only jar, not an error.
 
 Served standalone instead, it needs a static server that falls back unknown paths to
 `index.html` (client-side routing), and the API reachable at `/api` on the same origin.
