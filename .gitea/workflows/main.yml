@@ -224,12 +224,14 @@ jobs:
       #    here the signature is the only thing between a consumer and a swapped file.
       #    loopback pinentry because a runner has no tty; without it gpg hangs.
       #
-      # ⚠ UNVERIFIED AS OF 2026-09-03: whether `gpg` exists in the build image at all.
-      #    Every other cumba-oss Gitea workflow signs nothing, and cumba-oss-corej-rules
-      #    — the only one that does — has never got past its download step, so this image
-      #    has never had to provide gpg. The preflight below turns a bare
-      #    "gpg: command not found" at the end of the job into a named cause. If it
-      #    fires, install gnupg in the image (preferred) or add an apt step here.
+      # ✅ RESOLVED 2026-09-07: `gpg` IS present. maven-with-nodejs installs gnupg
+      #    explicitly, alongside bzip2, zip/unzip, docker.io, python3 and jq. This read
+      #    UNVERIFIED because no cumba-oss Gitea workflow had ever reached a signing step
+      #    — cumba-oss-corej-rules, the only other one that signs, never got past its
+      #    download — so the image had never had to provide gpg.
+      #    ⚠ Still UNEXERCISED: present in the image is not proven in a run. The preflight
+      #    below therefore stays, turning a future image change into a named cause rather
+      #    than a bare "gpg: command not found" at the end of the job.
       - name: Import signing key
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
