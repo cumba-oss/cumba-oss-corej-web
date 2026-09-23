@@ -34,7 +34,7 @@ exactly right. `assembly/` is committed; do not widen the rule to cover it.
 mvn -B clean verify          # the whole gate, exactly what CI runs
 ```
 
-`${revision}` falls back to `0.1.0-SNAPSHOT`. A release build sets it, and the archive is
+`${revision}` falls back to `0.1.1-SNAPSHOT`. A release build sets it, and the archive is
 named from it:
 
 ```bash

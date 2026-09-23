@@ -1,7 +1,7 @@
 # Gitea Actions — build and gate the validator SPA, and cut signed releases.
 #
 # The INTERNAL counterpart to .github/workflows/ci.yml. See that file's header for
-# the four things that deliberately differ between the two; do not "unify" them.
+# the five things that deliberately differ between the two; do not "unify" them.
 #
 # ⛔ THIS REPOSITORY DEPLOYS NO MAVEN ARTIFACTS — not to Central, not to the internal
 # Nexus. The single module is packaging=pom and the deliverable is the built SPA. There is

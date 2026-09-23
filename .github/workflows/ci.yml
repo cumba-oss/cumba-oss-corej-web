@@ -4,7 +4,7 @@
 # gate against the same commands, so an outside contributor's PR is held to the
 # standard the internal build enforces.
 #
-# ⚠ It is deliberately NOT a copy of the Gitea workflow. Four things invert,
+# ⚠ It is deliberately NOT a copy of the Gitea workflow. Five things invert,
 # and each one breaks the build if carried across:
 #
 #   1. NO CONTAINER. The Gitea job runs in a private image on an internal
@@ -22,6 +22,19 @@
 #      everything through an authenticated mirror. ⚠ This asymmetry is why the
 #      two forges disagreed for four runs: the Gitea file simply omitted the
 #      pair, and nothing in THIS file could ever have shown it.
+#   5. NO POST-RELEASE DEV-LINE GUARD. The Gitea "Resolve version" step ALSO
+#      compares <revision> against the newest v* tag and fails `main` when the
+#      dev line was never moved on after a release; this file keeps only the
+#      -SNAPSHOT check. ⭐ So after every tag, Gitea's `main` goes red here while
+#      this lane stays green — and that red is CORRECT, not a defect: without it
+#      `main` republishes a snapshot of a released version. The fix is to bump
+#      <revision>, and the guard's own error message prints the command. Do not
+#      add the guard to this file and do not "repair" that red.
+#      > Measured 2026-09-23: v0.1.0 was tagged, and the next `main` push went red
+#      > on Gitea for exactly this reason. Third red-Gitea/green-GitHub split on
+#      > this repo in one day — the first two were real defects (item 4 and a
+#      > missing GH_REPO below), this one was the guard doing its job. The split
+#      > alone tells you nothing; read the error.
 #
 # ⛔ THIS REPOSITORY PUBLISHES NOTHING TO MAVEN CENTRAL. The single module
 # is packaging=pom and the deliverable is the built SPA, shipped as a signed
