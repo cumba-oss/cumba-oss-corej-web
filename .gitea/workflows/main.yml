@@ -1,7 +1,7 @@
 # Gitea Actions — build and gate the validator SPA, and cut signed releases.
 #
 # The INTERNAL counterpart to .github/workflows/ci.yml. See that file's header for
-# the three things that deliberately differ between the two; do not "unify" them.
+# the four things that deliberately differ between the two; do not "unify" them.
 #
 # ⛔ THIS REPOSITORY DEPLOYS NO MAVEN ARTIFACTS — not to Central, not to the internal
 # Nexus. The single module is packaging=pom and the deliverable is the built SPA. There is
@@ -25,6 +25,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Minutes, not hours. Without a cap a hung npm step sits against the container's
+    # own `/bin/sleep 10800`, so the job burns three hours to report a stall. 30 is what
+    # the internal twin and this repo's .github lane both use; the whole gate is ~30 s.
+    timeout-minutes: 30
     container:
       image: ${{ vars.DOCKER_REGISTRY_HOSTNAME }}/maven-with-nodejs:3.9-eclipse-temurin-25
     defaults:
@@ -33,6 +37,20 @@ jobs:
     outputs:
       version: ${{ steps.ver.outputs.version }}
     env:
+      # ⛔ REQUIRED even though this pom declares zero <dependency>: the PLUGINS still
+      # resolve through the build image's baked-in settings.xml, whose Nexus mirror
+      # declares <server id="nexus"> with ${env.NEXUS_USER} / ${env.NEXUS_PASS} rather
+      # than literal credentials. Without these the very first plugin download is
+      # anonymous and the job dies on 401 — which reads as a broken build and is a
+      # missing-credential fault. Measured: runs 1-4 of this repo ALL failed inside one
+      # second, on maven-enforcer-plugin, before a single gate ran. CI-RUNBOOK Phase 01,
+      # blocker 1.
+      # ⚠ There is deliberately NO counterpart in .github/workflows/ci.yml: that lane is
+      # containerless and resolves from Central, so it has no mirror to authenticate to
+      # — which is exactly why this gap stayed invisible there while GitHub was green and
+      # Gitea was red. It is divergence 4 in that file's header.
+      NEXUS_USER: ${{ secrets.NEXUS_USER }}
+      NEXUS_PASS: ${{ secrets.NEXUS_PASS }}
       # ⚠ LOAD-BEARING, and referenced by name from vite.config.ts.
       # The jsdom suite is heavy; uncapped, vitest starts one worker per CPU and
       # saturates the runner host. A saturated host stalls the Docker daemon, and

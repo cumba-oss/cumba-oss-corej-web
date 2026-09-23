@@ -4,7 +4,7 @@
 # gate against the same commands, so an outside contributor's PR is held to the
 # standard the internal build enforces.
 #
-# ⚠ It is deliberately NOT a copy of the Gitea workflow. Three things invert,
+# ⚠ It is deliberately NOT a copy of the Gitea workflow. Four things invert,
 # and each one breaks the build if carried across:
 #
 #   1. NO CONTAINER. The Gitea job runs in a private image on an internal
@@ -16,6 +16,12 @@
 #      Neither pin is portable; do not "unify" them.
 #   3. NO SONAR AND NO NEXUS DEPLOY. Those target internal hosts — and this
 #      repository deploys no Maven artifacts anywhere in any case.
+#   4. NO NEXUS CREDENTIALS. This lane is containerless and resolves from
+#      Central, so there is no mirror to authenticate to; the Gitea job MUST
+#      export NEXUS_USER / NEXUS_PASS because the image's settings.xml sends
+#      everything through an authenticated mirror. ⚠ This asymmetry is why the
+#      two forges disagreed for four runs: the Gitea file simply omitted the
+#      pair, and nothing in THIS file could ever have shown it.
 #
 # ⛔ THIS REPOSITORY PUBLISHES NOTHING TO MAVEN CENTRAL. The single module
 # is packaging=pom and the deliverable is the built SPA, shipped as a signed
