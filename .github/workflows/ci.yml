@@ -225,7 +225,30 @@ jobs:
       # --verify-tag refuses to invent a tag that does not exist.
       - name: Create release
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+          # ⛔⛔ GH_REPO IS LOAD-BEARING, and its absence is invisible until a tag.
+          #
+          # This job does NOT check out the repository — it has no need to, and none of
+          # the seven sibling repos check out either. But `gh` resolves the target repo
+          # from the git remote of the working directory, so with no checkout and no
+          # GH_REPO it dies BEFORE it looks at the token:
+          #
+          #   failed to run git: fatal: not a git repository (or any of the parent
+          #   directories): .git
+          #
+          # Measured 2026-09-23 with gh 2.98.0: without GH_REPO that is the whole error,
+          # with GH_REPO the same command reaches the API. So the message names git, not
+          # a repo or a permission, and reads as a checkout bug in a job that is
+          # deliberately checkout-free.
+          #   ⚠ v0.1.0, this repository's FIRST tag: build green, download/flatten/import
+          #   /sign all green, and only this last step red — with the Gitea release job
+          #   green on the same tag, because it uses gitea-release-action and needs no
+          #   repo inference. A red release beside a green one is not evidence about the
+          #   archives; every step that touched them had already passed.
+          # ⭐ All seven cumba-oss siblings set this pair. This file did not, because its
+          # release path was hand-written rather than ported — the same origin as the
+          # missing NEXUS_USER/NEXUS_PASS, and the second defect from it.
+          GH_REPO: ${{ github.repository }}
         run: |
           set -eo pipefail
           echo "attaching:"
