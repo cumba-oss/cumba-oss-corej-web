@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import {
+  Alert,
   Button,
   Group,
   MultiSelect,
@@ -133,6 +134,10 @@ export function NewRunView({
 }: NewRunViewProps): React.JSX.Element {
   const [submitting, setSubmitting] = useState(false);
   const [runOptions, setRunOptions] = useState<RunOptionsT | null>(null);
+  // The run-options problem detail (e.g. 503: the metadata store is of another format, with the
+  // operator's remedy) - rendered in the form instead of silently leaving the pickers free-text
+  // (PLAN-define-ct-evaluation review round 2, M-SPA).
+  const [runOptionsProblem, setRunOptionsProblem] = useState<string | null>(null);
   const [ruleOptions, setRuleOptions] = useState<RuleOptionsT | null>(null);
   const form = useForm<FormValues>({
     initialValues,
@@ -166,7 +171,9 @@ export function NewRunView({
   useEffect(() => {
     let active = true;
     void getRunOptions().then((result) => {
-      if (active && result.data) setRunOptions(result.data);
+      if (!active) return;
+      if (result.data) setRunOptions(result.data);
+      setRunOptionsProblem(result.problem ? result.problem.detail : null);
     });
     return () => {
       active = false;
@@ -317,6 +324,11 @@ export function NewRunView({
     <form onSubmit={handleSubmit} aria-label="New check run">
       <Stack gap="sm">
         <Title order={4}>New check run</Title>
+        {runOptionsProblem && (
+          <Alert color="red" title="Run options unavailable" role="alert">
+            {runOptionsProblem}
+          </Alert>
+        )}
         <Group grow align="flex-start">
           {packageNames.length > 0 ? (
             <MultiSelect

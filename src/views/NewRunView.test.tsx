@@ -160,6 +160,34 @@ describe("NewRunView", () => {
     expect(define).toHaveAttribute("readonly");
   });
 
+  it("renders the run-options problem detail in the form (503: metadata store of another format)", async () => {
+    server.use(
+      http.get("/api/meta/run-options", () =>
+        HttpResponse.json(
+          {
+            type: "about:blank",
+            title: "Service Unavailable",
+            status: 503,
+            detail:
+              "metadata store /srv/metadata-cache.zip is format 2; this build reads format 3; the store must be re-seeded. Set corej.cache-seed.enabled=true so the service re-seeds it at start-up, then restart.",
+          },
+          { status: 503, headers: { "Content-Type": "application/problem+json" } },
+        ),
+      ),
+    );
+
+    const { findByRole, getByRole } = renderWithProviders(
+      <NewRunView sessionId="s-1" availableFiles={[]} />,
+    );
+
+    const alert = await findByRole("alert");
+    expect(alert).toHaveTextContent("Run options unavailable");
+    expect(alert).toHaveTextContent("is format 2; this build reads format 3");
+    expect(alert).toHaveTextContent("corej.cache-seed.enabled=true");
+    // The form is still usable: with no run-options metadata the package picker is free text.
+    expect(getByRole("combobox", { name: /Rules packages/ })).toBeInTheDocument();
+  });
+
   it("renders the non-free-text run-option fields as dropdowns when metadata is present", async () => {
     server.use(
       http.get("/api/meta/run-options", () =>
