@@ -673,13 +673,12 @@ export function ResultsView({ checkRunId, status }: ResultsViewProps): React.JSX
           ONLY when rules could not be answered — a run that validated nothing must never read as
           clean. Rendered as a callout ABOVE the metadata table, not as two more Info rows: a
           degradation note formatted like every other row is exactly what gets skimmed past.
-          PLAN-report-conformance-fields (T1-2) added the two remaining run-level notes to the same
-          family: the Define-XML metadata basis and the CT declaration mismatch. */}
+          PLAN-report-conformance-fields (T1-2) added the Define-XML metadata basis to the same
+          family: it, too, means the run answered from degraded metadata. */}
       {conformance &&
         (conformance.libraryMetadataBasis ||
           conformance.dictionaryBasis ||
-          conformance.defineMetadataBasis ||
-          conformance.ctDeclarationMismatch) && (
+          conformance.defineMetadataBasis) && (
           <Alert color="orange" title="Degraded run — some rules could not be answered">
             <Stack gap={4}>
               {conformance.libraryMetadataBasis && (
@@ -691,12 +690,19 @@ export function ResultsView({ checkRunId, status }: ResultsViewProps): React.JSX
               {conformance.defineMetadataBasis && (
                 <Text size="sm">Define metadata basis: {conformance.defineMetadataBasis}</Text>
               )}
-              {conformance.ctDeclarationMismatch && (
-                <Text size="sm">CT declaration mismatch: {conformance.ctDeclarationMismatch}</Text>
-              )}
             </Stack>
           </Alert>
         )}
+
+      {/* The CT declaration mismatch is a property of the RUN, never a finding and not a
+          degradation (engine: define-ct §4.2): the Define-XML declared one CT package set and the
+          run used another. Its own informational callout, so it is neither skimmed past as an
+          Info row nor misread as "some rules could not be answered" (review M2). */}
+      {conformance?.ctDeclarationMismatch && (
+        <Alert color="blue" title="CT declaration mismatch">
+          <Text size="sm">{conformance.ctDeclarationMismatch}</Text>
+        </Alert>
+      )}
 
       <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
         {/* Info (compressed). */}

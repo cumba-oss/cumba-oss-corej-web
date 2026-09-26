@@ -205,8 +205,8 @@ describe("ResultsView", () => {
     expect(screen.getByText(/Library metadata basis: unavailable/)).toBeInTheDocument();
   });
 
-  it("surfaces the define metadata basis and the CT declaration mismatch in the same alert", async () => {
-    // PLAN-report-conformance-fields P15 / W2: the two notes that were JSON-only until 2026-09-26.
+  it("surfaces the define metadata basis as a degradation, alone", async () => {
+    // PLAN-report-conformance-fields P15 / W2 / review L2: each arm of the condition alone.
     server.use(
       http.get("*/api/checks/:id/conformance", () =>
         HttpResponse.json({
@@ -214,7 +214,6 @@ describe("ResultsView", () => {
           version: "V3.4",
           reportGeneration: "2026-05-28T10:00:09Z",
           defineMetadataBasis: "degraded — the Define-XML could not be parsed directly",
-          ctDeclarationMismatch: "define declares sdtmct-2023-12-15; run used sdtmct-2024-09-27",
         }),
       ),
     );
@@ -223,12 +222,32 @@ describe("ResultsView", () => {
       await screen.findByText("Degraded run — some rules could not be answered"),
     ).toBeInTheDocument();
     expect(screen.getByText(/Define metadata basis: degraded/)).toBeInTheDocument();
-    expect(
-      screen.getByText(/CT declaration mismatch: define declares sdtmct-2023-12-15/),
-    ).toBeInTheDocument();
-    // Neither of the other two notes is fabricated from an absent field.
+    // Neither of the other notes is fabricated from an absent field.
     expect(screen.queryByText(/Dictionary basis:/)).not.toBeInTheDocument();
     expect(screen.queryByText(/Library metadata basis:/)).not.toBeInTheDocument();
+    expect(screen.queryByText("CT declaration mismatch")).not.toBeInTheDocument();
+  });
+
+  it("shows a CT declaration mismatch as its own note, never as a degraded run", async () => {
+    // Review M2: a mismatch is a property of the run, not "some rules could not be answered".
+    server.use(
+      http.get("*/api/checks/:id/conformance", () =>
+        HttpResponse.json({
+          standard: "SDTMIG",
+          version: "V3.4",
+          reportGeneration: "2026-05-28T10:00:09Z",
+          ctDeclarationMismatch: "define declares sdtmct-2023-12-15; run used sdtmct-2024-09-27",
+        }),
+      ),
+    );
+    renderWithProviders(<ResultsView checkRunId="run-1" status="SUCCEEDED" />);
+    expect(await screen.findByText("CT declaration mismatch")).toBeInTheDocument();
+    expect(
+      screen.getByText("define declares sdtmct-2023-12-15; run used sdtmct-2024-09-27"),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText("Degraded run — some rules could not be answered"),
+    ).not.toBeInTheDocument();
   });
 
   it("shows no degradation alert on a healthy run", async () => {
