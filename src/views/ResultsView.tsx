@@ -672,19 +672,31 @@ export function ResultsView({ checkRunId, status }: ResultsViewProps): React.JSX
       {/* Degradation basis lines (Fix #369 / PLAN-dictionary-seeder D13): the server sends these
           ONLY when rules could not be answered — a run that validated nothing must never read as
           clean. Rendered as a callout ABOVE the metadata table, not as two more Info rows: a
-          degradation note formatted like every other row is exactly what gets skimmed past. */}
-      {conformance && (conformance.libraryMetadataBasis || conformance.dictionaryBasis) && (
-        <Alert color="orange" title="Degraded run — some rules could not be answered">
-          <Stack gap={4}>
-            {conformance.libraryMetadataBasis && (
-              <Text size="sm">Library metadata basis: {conformance.libraryMetadataBasis}</Text>
-            )}
-            {conformance.dictionaryBasis && (
-              <Text size="sm">Dictionary basis: {conformance.dictionaryBasis}</Text>
-            )}
-          </Stack>
-        </Alert>
-      )}
+          degradation note formatted like every other row is exactly what gets skimmed past.
+          PLAN-report-conformance-fields (T1-2) added the two remaining run-level notes to the same
+          family: the Define-XML metadata basis and the CT declaration mismatch. */}
+      {conformance &&
+        (conformance.libraryMetadataBasis ||
+          conformance.dictionaryBasis ||
+          conformance.defineMetadataBasis ||
+          conformance.ctDeclarationMismatch) && (
+          <Alert color="orange" title="Degraded run — some rules could not be answered">
+            <Stack gap={4}>
+              {conformance.libraryMetadataBasis && (
+                <Text size="sm">Library metadata basis: {conformance.libraryMetadataBasis}</Text>
+              )}
+              {conformance.dictionaryBasis && (
+                <Text size="sm">Dictionary basis: {conformance.dictionaryBasis}</Text>
+              )}
+              {conformance.defineMetadataBasis && (
+                <Text size="sm">Define metadata basis: {conformance.defineMetadataBasis}</Text>
+              )}
+              {conformance.ctDeclarationMismatch && (
+                <Text size="sm">CT declaration mismatch: {conformance.ctDeclarationMismatch}</Text>
+              )}
+            </Stack>
+          </Alert>
+        )}
 
       <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
         {/* Info (compressed). */}

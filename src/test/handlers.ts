@@ -66,8 +66,10 @@ const conformance: ConformanceResponseT = {
   defineXmlVersion: "2.1",
   coreEngineVersion: "1.0",
   totalRuntime: "12.34 seconds",
+  // The server emits "True" / "None" here (PLAN-report-conformance-fields D2), never a boolean's
+  // text; the healthy default is an unlimited run.
   issueLimitPerRule: "None",
-  issueLimitPerDataset: "false",
+  issueLimitPerDataset: "None",
   reportGeneration: "2026-05-28T10:00:09Z",
 };
 

@@ -534,6 +534,14 @@ export interface components {
              * @description Stored size in bytes
              */
             size?: number;
+            /** @description Bare names of the Define-XML-referenced datasets that were staged alongside this file. Empty unless the staged file was a Define-XML. */
+            stagedReferences?: string[];
+            /** @description Define-XML-referenced datasets that could NOT be staged, with the reason. A non-empty list means the session holds an INCOMPLETE dataset set, so a check run over it would validate a partial study. */
+            skippedReferences?: components["schemas"]["SkippedReference"][];
+        };
+        SkippedReference: {
+            url?: string;
+            reason?: string;
         };
         /** @description Stage a file into a session by URL */
         UrlUploadRequest: {
@@ -743,12 +751,13 @@ export interface components {
             null?: boolean;
             object?: boolean;
             float?: boolean;
-            container?: boolean;
-            string?: boolean;
-            missingNode?: boolean;
             valueNode?: boolean;
+            missingNode?: boolean;
+            /** @enum {string} */
+            nodeType?: "ARRAY" | "BINARY" | "BOOLEAN" | "MISSING" | "NULL" | "NUMBER" | "OBJECT" | "POJO" | "STRING";
+            string?: boolean;
+            integralNumber?: boolean;
             pojo?: boolean;
-            number?: boolean;
             floatingPointNumber?: boolean;
             short?: boolean;
             int?: boolean;
@@ -760,9 +769,8 @@ export interface components {
             textual?: boolean;
             boolean?: boolean;
             binary?: boolean;
-            /** @enum {string} */
-            nodeType?: "ARRAY" | "BINARY" | "BOOLEAN" | "MISSING" | "NULL" | "NUMBER" | "OBJECT" | "POJO" | "STRING";
-            integralNumber?: boolean;
+            container?: boolean;
+            number?: boolean;
             embeddedValue?: boolean;
         };
         /** @description Execution stats for one validated domain */
@@ -1001,9 +1009,9 @@ export interface components {
             coreEngineVersion?: string;
             /** @description Total runtime, e.g. "12.34 seconds" */
             totalRuntime?: string;
-            /** @description Per-rule issue limit, or "None" */
+            /** @description The findings cap the run applied per rule and dataset (the engine materialises at most this many findings per rule per dataset; default 1000), or "None" when the run was unlimited */
             issueLimitPerRule?: string;
-            /** @description Per-dataset issue limit flag */
+            /** @description "True" when a finite per-rule cap was applied (the engine's cap is always per rule and dataset), else "None" */
             issueLimitPerDataset?: string;
             /** @description Report generation timestamp (UTC, ISO-8601) */
             reportGeneration?: string;
@@ -1011,6 +1019,24 @@ export interface components {
             libraryMetadataBasis?: string;
             /** @description External-dictionary degradation note — present only when some dictionary rule in the run could not be answered; names what loaded (with versions), what did not and why, and the answerable count */
             dictionaryBasis?: string;
+            /** @description CT declaration mismatch note — present only when the Define-XML declares a controlled-terminology package set that differs from the one the run used ("define declares X; run used Y") */
+            ctDeclarationMismatch?: string;
+            /** @description Define-XML metadata degradation note — present only when the Define-XML could not be parsed directly and names what the define metadata degraded to */
+            defineMetadataBasis?: string;
+            /** @description UNII dictionary version the run used, if any */
+            uniiVersion?: string;
+            /** @description Med-RT dictionary version the run used, if any */
+            medRtVersion?: string;
+            /** @description MedDRA dictionary version the run used, if any */
+            meddraVersion?: string;
+            /** @description WHODrug dictionary version the run used, if any */
+            whodrugVersion?: string;
+            /** @description SNOMED dictionary version the run used, if any */
+            snomedVersion?: string;
+            /** @description LOINC dictionary version the run used, if any */
+            loincVersion?: string;
+            /** @description Neoplasm dictionary version the run used, if any */
+            neoplasmVersion?: string;
         };
         /** @description Downloadable artifacts of a run */
         RunArtifacts: {

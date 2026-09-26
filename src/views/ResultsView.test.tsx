@@ -205,6 +205,32 @@ describe("ResultsView", () => {
     expect(screen.getByText(/Library metadata basis: unavailable/)).toBeInTheDocument();
   });
 
+  it("surfaces the define metadata basis and the CT declaration mismatch in the same alert", async () => {
+    // PLAN-report-conformance-fields P15 / W2: the two notes that were JSON-only until 2026-09-26.
+    server.use(
+      http.get("*/api/checks/:id/conformance", () =>
+        HttpResponse.json({
+          standard: "SDTMIG",
+          version: "V3.4",
+          reportGeneration: "2026-05-28T10:00:09Z",
+          defineMetadataBasis: "degraded — the Define-XML could not be parsed directly",
+          ctDeclarationMismatch: "define declares sdtmct-2023-12-15; run used sdtmct-2024-09-27",
+        }),
+      ),
+    );
+    renderWithProviders(<ResultsView checkRunId="run-1" status="SUCCEEDED" />);
+    expect(
+      await screen.findByText("Degraded run — some rules could not be answered"),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Define metadata basis: degraded/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/CT declaration mismatch: define declares sdtmct-2023-12-15/),
+    ).toBeInTheDocument();
+    // Neither of the other two notes is fabricated from an absent field.
+    expect(screen.queryByText(/Dictionary basis:/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Library metadata basis:/)).not.toBeInTheDocument();
+  });
+
   it("shows no degradation alert on a healthy run", async () => {
     // The default handler's conformance carries neither basis field.
     renderWithProviders(<ResultsView checkRunId="run-1" status="SUCCEEDED" />);
