@@ -1009,7 +1009,7 @@ export interface components {
             coreEngineVersion?: string;
             /** @description Total runtime, e.g. "12.34 seconds" */
             totalRuntime?: string;
-            /** @description The findings cap the run applied per rule and dataset (the engine materialises at most this many findings per rule per dataset), or "None" when the run was unlimited. Precedence, first set wins: the request's maxErrorsPerRule, the deployment's corej.engine.max-errors-per-rule, the JVM property corej.maxErrorsPerRule, the MAX_ERRORS_PER_RULE environment variable, then 1000. Reports produced by an engine without this field's fix (a coreEngineVersion predating it) always say "None" here, whatever cap their run applied */
+            /** @description The findings cap the run applied per rule and dataset (the engine materialises at most this many findings per rule per dataset), or "None" when the run was unlimited. Precedence, first set wins: the request's maxErrorsPerRule, the deployment's corej.engine.max-errors-per-rule, the JVM property corej.maxErrorsPerRule, the MAX_ERRORS_PER_RULE environment variable, then 1000. An unstamped report (coreEngineVersion null) or one produced by an engine without this change may carry "None" here for a capped run */
             issueLimitPerRule?: string;
             /** @description "True" when a finite per-rule cap was applied (the engine's cap is always per rule and dataset), else "None" */
             issueLimitPerDataset?: string;
