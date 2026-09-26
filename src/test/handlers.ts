@@ -70,7 +70,7 @@ const conformance: ConformanceResponseT = {
   // text; the healthy default is an unlimited run.
   issueLimitPerRule: "None",
   issueLimitPerDataset: "None",
-  reportGeneration: "2026-05-28T10:00:09Z",
+  reportGeneration: "2026-05-28T10:00:09",
 };
 
 const rules: RuleReportRowT[] = [

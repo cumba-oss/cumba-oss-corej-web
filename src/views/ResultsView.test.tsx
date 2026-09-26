@@ -166,7 +166,7 @@ describe("ResultsView", () => {
           substandard: "adam",
           version: "V1.0",
           ctVersion: "2023-12-15",
-          reportGeneration: "2026-05-28T10:00:09Z",
+          reportGeneration: "2026-05-28T10:00:09",
         }),
       ),
     );
@@ -187,7 +187,7 @@ describe("ResultsView", () => {
         HttpResponse.json({
           standard: "SDTMIG",
           version: "V3.4",
-          reportGeneration: "2026-05-28T10:00:09Z",
+          reportGeneration: "2026-05-28T10:00:09",
           dictionaryBasis:
             "external dictionaries degraded: 0 of 98 dictionary rules in this run were answerable, the rest SKIPPED.",
           libraryMetadataBasis:
@@ -212,7 +212,7 @@ describe("ResultsView", () => {
         HttpResponse.json({
           standard: "SDTMIG",
           version: "V3.4",
-          reportGeneration: "2026-05-28T10:00:09Z",
+          reportGeneration: "2026-05-28T10:00:09",
           defineMetadataBasis: "degraded — the Define-XML could not be parsed directly",
         }),
       ),
@@ -235,7 +235,7 @@ describe("ResultsView", () => {
         HttpResponse.json({
           standard: "SDTMIG",
           version: "V3.4",
-          reportGeneration: "2026-05-28T10:00:09Z",
+          reportGeneration: "2026-05-28T10:00:09",
           ctDeclarationMismatch: "define declares sdtmct-2023-12-15; run used sdtmct-2024-09-27",
         }),
       ),

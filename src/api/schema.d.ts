@@ -1013,7 +1013,7 @@ export interface components {
             issueLimitPerRule?: string;
             /** @description "True" when a finite per-rule cap was applied (the engine's cap is always per rule and dataset), else "None" */
             issueLimitPerDataset?: string;
-            /** @description Report generation timestamp (UTC, ISO-8601) */
+            /** @description Report generation timestamp (UTC, ISO-8601 local date-time without zone designator) */
             reportGeneration?: string;
             /** @description Library degradation note — present only when the CDISC Library could not be consulted for the run */
             libraryMetadataBasis?: string;
