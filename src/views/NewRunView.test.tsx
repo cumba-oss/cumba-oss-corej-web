@@ -169,7 +169,7 @@ describe("NewRunView", () => {
             title: "Service Unavailable",
             status: 503,
             detail:
-              "metadata store /srv/metadata-cache.zip is format 2; this build reads format 3; the store must be re-seeded. Set corej.cache-seed.enabled=true so the service re-seeds it at start-up, then restart.",
+              "metadata store /srv/metadata-cache.zip is format 2; this build reads format 4; the store must be re-seeded. Set corej.cache-seed.enabled=true so the service re-seeds it at start-up, then restart.",
           },
           { status: 503, headers: { "Content-Type": "application/problem+json" } },
         ),
@@ -182,7 +182,7 @@ describe("NewRunView", () => {
 
     const alert = await findByRole("alert");
     expect(alert).toHaveTextContent("Run options unavailable");
-    expect(alert).toHaveTextContent("is format 2; this build reads format 3");
+    expect(alert).toHaveTextContent("is format 2; this build reads format 4");
     expect(alert).toHaveTextContent("corej.cache-seed.enabled=true");
     // The form is still usable: with no run-options metadata the package picker is free text.
     expect(getByRole("combobox", { name: /Rules packages/ })).toBeInTheDocument();
