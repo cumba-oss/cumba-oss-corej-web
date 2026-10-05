@@ -930,7 +930,7 @@ export interface components {
             keys?: {
                 [key: string]: string;
             };
-            /** @description Which tier produced the record key: DEFINE_KEY, STRUCTURAL, NATURAL or SPONSOR_ID */
+            /** @description Which tier produced the record key: DEFINE_KEY, STRUCTURAL, NATURAL, SPONSOR_ID or GROUP (a Group finding, keyed by its group variables; a group finding with no grouping column present carries no key) */
             keySource?: string;
         };
         /** @description A page of finding rows */
