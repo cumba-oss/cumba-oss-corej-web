@@ -922,6 +922,8 @@ export interface components {
             values?: string[];
             /** @description Domain / dataset name (disambiguates findings sharing a file) */
             domain?: string;
+            /** @description Raw dataset columns the finding lists by name without a value: a column a non-record finding (dataset verdict, per-variable finding) is about, whose cell would be an arbitrary row's. Disjoint from variables; omitted when empty */
+            columns?: string[];
             /** @description Ordered record-key column names identifying this row, when resolved */
             keyVariables?: string[];
             /** @description Record-key values for this row, keyed by column name */

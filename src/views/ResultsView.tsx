@@ -1411,15 +1411,23 @@ function LogLines({
   );
 }
 
+/** The rendering of a column a finding lists by name without a value (see formatVariables). */
+export const NAME_ONLY_SUFFIX = " (no value)";
+
 /**
- * Zip a finding's positional `variables`/`values` into "NAME = value" pairs and
- * join them for the Variables column. Returns "—" when no variables are reported.
+ * Zip a finding's positional `variables`/`values` into "NAME = value" pairs, then append the
+ * finding's `columns` — the raw columns it lists BY NAME WITHOUT A VALUE (a dataset verdict's
+ * subject, whose cell would be an arbitrary row's) — as "NAME (no value)", and join them for the
+ * Variables column. "NAME (no value)" is a state of its own: never "NAME = " (an empty value) and
+ * never "NAME = ." (a missing one). Returns "—" when the finding reports neither.
  */
-function formatVariables(f: FindingRowT): string {
+export function formatVariables(f: FindingRowT): string {
   const names = f.variables ?? [];
-  if (names.length === 0) return "—";
   const vals = f.values ?? [];
-  return names.map((name, i) => `${name} = ${vals[i] ?? ""}`).join(", ");
+  const columns = f.columns ?? [];
+  const parts = names.map((name, i) => `${name} = ${vals[i] ?? ""}`);
+  for (const column of columns) parts.push(`${column}${NAME_ONLY_SUFFIX}`);
+  return parts.length === 0 ? "—" : parts.join(", ");
 }
 
 /**

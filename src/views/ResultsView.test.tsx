@@ -380,6 +380,9 @@ describe("ResultsView", () => {
               message: "USUBJID is required",
               variables: ["USUBJID"],
               values: [""],
+              // A column the finding lists by name without a value (P2 of
+              // PLAN-finding-values-record-level-only) rides beside the valued variables.
+              columns: ["RANDFL"],
               keyVariables: ["QNAM", "IDVARVAL"],
               keys: { QNAM: "AESOSP" },
             },
@@ -398,6 +401,9 @@ describe("ResultsView", () => {
     expect(screen.getByText("QNAM = AESOSP, IDVARVAL =")).toBeInTheDocument();
     // The tier is never surfaced anywhere in the table (D10).
     expect(screen.queryByText(/SPONSOR_ID/)).not.toBeInTheDocument();
+    // A name-only column renders as its own state after the valued pairs — never as "RANDFL = ".
+    expect(screen.getByText("USUBJID = , RANDFL (no value)")).toBeInTheDocument();
+    expect(screen.queryByText(/RANDFL =/)).not.toBeInTheDocument();
   });
 
   it("uses executability as the Note fallback when no notExecutedReason", async () => {
