@@ -329,12 +329,21 @@ describe("ResultsView", () => {
     expect(items.map((i) => i.getAttribute("aria-label"))).toEqual([
       "USUBJID (authored)",
       "--TESTCD (derived)",
-      "AGE (derived)",
+      "age (derived)",
       "AGEU (excluded)",
     ]);
-    // Names as written: a wildcard is not expanded and nothing is upper-cased away.
+    // Names as written: a wildcard is not expanded and nothing is upper-cased. The lowercase
+    // fixture name carries the case claim: a Mantine Badge upper-cases by default, so only
+    // the badge's own text-transform override keeps "age" as written.
     expect(within(section).getByText("--TESTCD")).toBeInTheDocument();
+    expect(within(section).getByText("age")).toBeInTheDocument();
+    // The badge's own inline override, not toHaveStyle: jsdom loads no Mantine CSS, so the
+    // computed text-transform is "none" with or without the override (measured).
+    expect(items[2].style.textTransform).toBe("none");
     expect(within(section).getByText("!AGEU")).toBeInTheDocument();
+    // An exclusion is struck through; an effective name is not.
+    expect(items[3]).toHaveStyle({ textDecoration: "line-through" });
+    expect(items[2]).not.toHaveStyle({ textDecoration: "line-through" });
     expect(
       within(section).getByText(/names as written in the rule; wildcards resolve per dataset/),
     ).toBeInTheDocument();

@@ -141,7 +141,7 @@ const sampleRuleDefinition = {
   },
   expanded: null,
   outputVariables: {
-    effective: ["USUBJID", "--TESTCD", "AGE"],
+    effective: ["USUBJID", "--TESTCD", "age"],
     authored: ["USUBJID"],
     excluded: ["AGEU"],
     derived: true,

@@ -158,9 +158,11 @@ export async function downloadLog(checkRunId: string): Promise<ApiResult<Blob>> 
 
 /**
  * GET /api/checks/{id}/rules/{coreId}/definition — the run-scoped rule
- * definition `{ source, expanded }` for one rule (by the row's CORE id). Used
- * by the rule-definition overlay; `source` is the raw pack rule object and
- * `expanded` the synthetic generated rule that ran (null for plain rules).
+ * definition `{ source, expanded, outputVariables }` for one rule (by the
+ * row's CORE id). Used by the rule-definition overlay; `source` is the raw pack
+ * rule object, `expanded` the synthetic generated rule that ran (null for plain
+ * rules) and `outputVariables` the shown rule's report-column listing (absent
+ * for runs persisted before it existed).
  */
 export async function ruleDefinition(
   checkRunId: string,

@@ -1159,11 +1159,12 @@ function OutputVariablesSection({ listing }: { listing: RuleOutputVariablesT }):
       )}
       {listing.effective.length + listing.excluded.length > 0 && (
         <Group gap={6} role="list">
-          {listing.effective.map((name) => {
+          {listing.effective.map((name, i) => {
             const kind = !derived || authored.has(name) ? "authored" : "derived";
             return (
               <Badge
-                key={`e-${name}`}
+                // By position: a rule that failed to load may list the same name twice.
+                key={`e-${i}`}
                 role="listitem"
                 aria-label={`${name} (${kind})`}
                 title={kind}
@@ -1174,9 +1175,9 @@ function OutputVariablesSection({ listing }: { listing: RuleOutputVariablesT }):
               </Badge>
             );
           })}
-          {listing.excluded.map((name) => (
+          {listing.excluded.map((name, i) => (
             <Badge
-              key={`x-${name}`}
+              key={`x-${i}`}
               role="listitem"
               aria-label={`${name} (excluded)`}
               title="excluded"

@@ -35,13 +35,16 @@ export type LiveLogResponseT = Schemas["LiveLogResponse"];
 /**
  * The report columns of the rule a definition shows (`expanded ?? source`), as
  * the engine's `OutputVariableListing` computes them: the effective list in
- * report order, the subset the rule writes, and its `!X` exclusions. Names are
- * as written in the rule (`--TESTCD`, `&NAME&` stay unexpanded).
+ * report order, the include entries the author wrote, and its `!X` exclusions.
+ * Names are as written in the rule (`--TESTCD`, `&NAME&` stay unexpanded).
  */
 export interface RuleOutputVariablesT {
   /** The columns a finding carries, in report order. */
   effective: string[];
-  /** The entries the rule writes itself (exact names). */
+  /**
+   * The include entries the author wrote (exact names); not necessarily in
+   * `effective` when the rule failed to load.
+   */
   authored: string[];
   /** The names the rule excludes with `!X`. */
   excluded: string[];
