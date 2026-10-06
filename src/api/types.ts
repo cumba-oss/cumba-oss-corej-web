@@ -33,6 +33,23 @@ export type RunArtifactsT = Schemas["RunArtifacts"];
 export type LiveLogResponseT = Schemas["LiveLogResponse"];
 
 /**
+ * The report columns of the rule a definition shows (`expanded ?? source`), as
+ * the engine's `OutputVariableListing` computes them: the effective list in
+ * report order, the subset the rule writes, and its `!X` exclusions. Names are
+ * as written in the rule (`--TESTCD`, `&NAME&` stay unexpanded).
+ */
+export interface RuleOutputVariablesT {
+  /** The columns a finding carries, in report order. */
+  effective: string[];
+  /** The entries the rule writes itself (exact names). */
+  authored: string[];
+  /** The names the rule excludes with `!X`. */
+  excluded: string[];
+  /** False when the rule failed to load: no derivation ran, effective is the authored list. */
+  derived: boolean;
+}
+
+/**
  * Run-scoped rule definition returned by
  * `GET /api/checks/{id}/rules/{coreId}/definition`: the raw source rule object
  * and, for generated/expanded rules, the synthetic concrete rule that ran.
@@ -43,6 +60,8 @@ export interface RuleDefinitionT {
   source?: unknown;
   /** The synthetic generated rule that ran (null for non-generated rules). */
   expanded?: unknown;
+  /** The shown rule's report columns; absent for runs persisted before it existed. */
+  outputVariables?: RuleOutputVariablesT;
   [key: string]: unknown;
 }
 

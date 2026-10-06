@@ -318,6 +318,118 @@ describe("ResultsView", () => {
     ).toBeInTheDocument();
   });
 
+  it("shows the effective output variables with authored, derived and excluded marked", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<ResultsView checkRunId="run-1" status="SUCCEEDED" />);
+    await user.click(await screen.findByRole("button", { name: "CORE-000001" }));
+    const dialog = await screen.findByRole("dialog");
+    const section = await within(dialog).findByRole("group", { name: "Output variables" });
+    const items = within(section).getAllByRole("listitem");
+    // Effective order first, then the exclusions; the kind is in the accessible name.
+    expect(items.map((i) => i.getAttribute("aria-label"))).toEqual([
+      "USUBJID (authored)",
+      "--TESTCD (derived)",
+      "AGE (derived)",
+      "AGEU (excluded)",
+    ]);
+    // Names as written: a wildcard is not expanded and nothing is upper-cased away.
+    expect(within(section).getByText("--TESTCD")).toBeInTheDocument();
+    expect(within(section).getByText("!AGEU")).toBeInTheDocument();
+    expect(
+      within(section).getByText(/names as written in the rule; wildcards resolve per dataset/),
+    ).toBeInTheDocument();
+    expect(within(section).queryByText(/none listed/)).not.toBeInTheDocument();
+    // The raw rule tabs are still there, below the section.
+    expect(within(dialog).getByRole("tab", { name: "JSON" })).toBeInTheDocument();
+  });
+
+  it("shows no output-variables section for a run persisted before the listing existed", async () => {
+    server.use(
+      http.get("/api/checks/:id/rules/:coreId/definition", () =>
+        HttpResponse.json({ source: { Core: { Id: "CORE-000001" } }, expanded: null }),
+      ),
+    );
+    const user = userEvent.setup();
+    renderWithProviders(<ResultsView checkRunId="run-1" status="SUCCEEDED" />);
+    await user.click(await screen.findByRole("button", { name: "CORE-000001" }));
+    const dialog = await screen.findByRole("dialog");
+    expect(await within(dialog).findByRole("tab", { name: "JSON" })).toBeInTheDocument();
+    expect(within(dialog).queryByRole("group", { name: "Output variables" })).toBeNull();
+    expect(within(dialog).queryByText(/none listed/)).toBeNull();
+  });
+
+  it("says in words when a rule lists no output variables", async () => {
+    server.use(
+      http.get("/api/checks/:id/rules/:coreId/definition", () =>
+        HttpResponse.json({
+          source: { Core: { Id: "CORE-000001" } },
+          expanded: null,
+          outputVariables: { effective: [], authored: [], excluded: [], derived: true },
+        }),
+      ),
+    );
+    const user = userEvent.setup();
+    renderWithProviders(<ResultsView checkRunId="run-1" status="SUCCEEDED" />);
+    await user.click(await screen.findByRole("button", { name: "CORE-000001" }));
+    const dialog = await screen.findByRole("dialog");
+    const section = await within(dialog).findByRole("group", { name: "Output variables" });
+    expect(
+      within(section).getByText(
+        "none listed — at run time the engine reports the columns the Check reads",
+      ),
+    ).toBeInTheDocument();
+    expect(within(section).queryAllByRole("listitem")).toHaveLength(0);
+  });
+
+  it("lists a rule that failed to load as authored, without the legend", async () => {
+    server.use(
+      http.get("/api/checks/:id/rules/:coreId/definition", () =>
+        HttpResponse.json({
+          source: { Core: { Id: "CORE-000001" } },
+          expanded: null,
+          outputVariables: {
+            effective: ["AESEV"],
+            authored: ["AESEV"],
+            excluded: ["AESER"],
+            derived: false,
+          },
+        }),
+      ),
+    );
+    const user = userEvent.setup();
+    renderWithProviders(<ResultsView checkRunId="run-1" status="SUCCEEDED" />);
+    await user.click(await screen.findByRole("button", { name: "CORE-000001" }));
+    const dialog = await screen.findByRole("dialog");
+    const section = await within(dialog).findByRole("group", { name: "Output variables" });
+    expect(within(section).getByText("rule failed to load — list as authored")).toBeInTheDocument();
+    expect(within(section).queryByText(/wildcards resolve per dataset/)).toBeNull();
+    expect(within(section).queryByText(/none listed/)).toBeNull();
+    expect(
+      within(section)
+        .getAllByRole("listitem")
+        .map((i) => i.getAttribute("aria-label")),
+    ).toEqual(["AESEV (authored)", "AESER (excluded)"]);
+  });
+
+  it("does not claim an empty list for a rule that failed to load", async () => {
+    server.use(
+      http.get("/api/checks/:id/rules/:coreId/definition", () =>
+        HttpResponse.json({
+          source: { Core: { Id: "CORE-000001" } },
+          expanded: null,
+          outputVariables: { effective: [], authored: [], excluded: [], derived: false },
+        }),
+      ),
+    );
+    const user = userEvent.setup();
+    renderWithProviders(<ResultsView checkRunId="run-1" status="SUCCEEDED" />);
+    await user.click(await screen.findByRole("button", { name: "CORE-000001" }));
+    const dialog = await screen.findByRole("dialog");
+    const section = await within(dialog).findByRole("group", { name: "Output variables" });
+    expect(within(section).getByText("rule failed to load — list as authored")).toBeInTheDocument();
+    expect(within(section).queryByText(/none listed/)).toBeNull();
+  });
+
   it("drills into a rule's findings with reordered columns", async () => {
     const user = userEvent.setup();
     renderWithProviders(<ResultsView checkRunId="run-1" status="SUCCEEDED" />);

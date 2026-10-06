@@ -129,13 +129,23 @@ const runArtifacts = {
   generatedAt: "2026-05-29T10:06:00.123Z",
 };
 
-/** A run-scoped rule definition (source only — non-generated rule). */
+/**
+ * A run-scoped rule definition (source only — non-generated rule) with the
+ * shown rule's output-variables listing: one authored entry, two derived, one
+ * `!X` exclusion.
+ */
 const sampleRuleDefinition = {
   source: {
     Core: { Id: "CORE-000001" },
     Description: "DM rule",
   },
   expanded: null,
+  outputVariables: {
+    effective: ["USUBJID", "--TESTCD", "AGE"],
+    authored: ["USUBJID"],
+    excluded: ["AGEU"],
+    derived: true,
+  },
 };
 
 const datasetGroups: FileGroupT[] = [

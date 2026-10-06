@@ -2,6 +2,7 @@ import { Fragment, Suspense, lazy, useCallback, useEffect, useRef, useState } fr
 import {
   Alert,
   Anchor,
+  Badge,
   Button,
   Card,
   Group,
@@ -37,6 +38,7 @@ import type {
   FindingRowT,
   RuleDefinitionT,
   RuleExecutionEntryT,
+  RuleOutputVariablesT,
   RunArtifactsT,
   RunLogT,
 } from "../api/types";
@@ -1049,10 +1051,11 @@ export function ResultsView({ checkRunId, status }: ResultsViewProps): React.JSX
 }
 
 /**
- * The rule-definition modal body: loading state, then the rule rendered as
- * JSON / YAML tabs. The rule shown is the materialized (expanded) rule when
- * present, otherwise the source rule — the source-template view is
- * intentionally not surfaced separately.
+ * The rule-definition modal body: loading state, then the shown rule's output
+ * variables (when the run recorded them) above the rule rendered as JSON /
+ * YAML tabs. The rule shown is the materialized (expanded) rule when present,
+ * otherwise the source rule — the source-template view is intentionally not
+ * surfaced separately.
  */
 function RuleDefOverlay({
   loading,
@@ -1080,19 +1083,114 @@ function RuleDefOverlay({
   const tabsFill = { flex: 1, minHeight: 0, display: "flex", flexDirection: "column" } as const;
   const panelFill = { flex: 1, minHeight: 0 } as const;
   return (
-    <Tabs defaultValue="json" style={tabsFill}>
-      <Tabs.List>
-        <Tabs.Tab value="json">JSON</Tabs.Tab>
-        <Tabs.Tab value="yaml">YAML</Tabs.Tab>
-      </Tabs.List>
-      <Tabs.Panel value="json" pt="sm" style={panelFill}>
-        <RuleJsonViewLazy value={value} />
-      </Tabs.Panel>
-      {/* keepMounted={false}: defer the CodeMirror bundle until the YAML tab is opened. */}
-      <Tabs.Panel value="yaml" pt="sm" keepMounted={false} style={panelFill}>
-        <RuleYamlViewLazy value={value} />
-      </Tabs.Panel>
-    </Tabs>
+    <>
+      {isOutputVariables(def.outputVariables) && (
+        <OutputVariablesSection listing={def.outputVariables} />
+      )}
+      <Tabs defaultValue="json" style={tabsFill}>
+        <Tabs.List>
+          <Tabs.Tab value="json">JSON</Tabs.Tab>
+          <Tabs.Tab value="yaml">YAML</Tabs.Tab>
+        </Tabs.List>
+        <Tabs.Panel value="json" pt="sm" style={panelFill}>
+          <RuleJsonViewLazy value={value} />
+        </Tabs.Panel>
+        {/* keepMounted={false}: defer the CodeMirror bundle until the YAML tab is opened. */}
+        <Tabs.Panel value="yaml" pt="sm" keepMounted={false} style={panelFill}>
+          <RuleYamlViewLazy value={value} />
+        </Tabs.Panel>
+      </Tabs>
+    </>
+  );
+}
+
+/**
+ * Whether a rule definition carries a usable output-variables listing. A run
+ * persisted before the listing existed has none, and the overlay then shows no
+ * section at all — neither an error nor an empty claim.
+ */
+function isOutputVariables(value: unknown): value is RuleOutputVariablesT {
+  if (typeof value !== "object" || value === null) return false;
+  const v = value as Record<string, unknown>;
+  return (
+    Array.isArray(v.effective) &&
+    Array.isArray(v.authored) &&
+    Array.isArray(v.excluded) &&
+    typeof v.derived === "boolean"
+  );
+}
+
+/**
+ * The shown rule's report columns (owner rulings D1 (b) / D3, 2026-10-05): the
+ * effective list in report order, the entries the rule writes itself filled
+ * and the derived ones outlined, then each `!X` exclusion struck through. Each
+ * badge names its kind in its accessible label, so colour is never the only
+ * cue. Names are as written in the rule — wildcards resolve per dataset.
+ */
+function OutputVariablesSection({ listing }: { listing: RuleOutputVariablesT }): React.JSX.Element {
+  const authored = new Set(listing.authored);
+  // A rule that failed to load ran no derivation: its list is the authored one.
+  const derived = listing.derived;
+  return (
+    <Stack gap={4} mb="sm" aria-label="Output variables" role="group">
+      <Text size="sm" fw={600}>
+        Output variables
+      </Text>
+      {derived ? (
+        <Text size="xs" c="dimmed">
+          <Badge component="span" size="xs" variant="filled" tt="none">
+            authored
+          </Badge>{" "}
+          ·{" "}
+          <Badge component="span" size="xs" variant="outline" tt="none">
+            derived
+          </Badge>{" "}
+          — names as written in the rule; wildcards resolve per dataset
+        </Text>
+      ) : (
+        <Text size="xs" c="dimmed">
+          rule failed to load — list as authored
+        </Text>
+      )}
+      {listing.effective.length === 0 && derived && (
+        <Text size="sm" c="dimmed">
+          none listed — at run time the engine reports the columns the Check reads
+        </Text>
+      )}
+      {listing.effective.length + listing.excluded.length > 0 && (
+        <Group gap={6} role="list">
+          {listing.effective.map((name) => {
+            const kind = !derived || authored.has(name) ? "authored" : "derived";
+            return (
+              <Badge
+                key={`e-${name}`}
+                role="listitem"
+                aria-label={`${name} (${kind})`}
+                title={kind}
+                variant={kind === "authored" ? "filled" : "outline"}
+                tt="none"
+              >
+                {name}
+              </Badge>
+            );
+          })}
+          {listing.excluded.map((name) => (
+            <Badge
+              key={`x-${name}`}
+              role="listitem"
+              aria-label={`${name} (excluded)`}
+              title="excluded"
+              variant="light"
+              color="gray"
+              tt="none"
+              td="line-through"
+            >
+              !{name}
+            </Badge>
+          ))}
+        </Group>
+      )}
+    </Stack>
   );
 }
 
