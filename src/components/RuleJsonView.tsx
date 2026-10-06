@@ -93,8 +93,7 @@ export function RuleJsonView({ value }: RuleJsonViewProps): React.JSX.Element {
         </Button>
         <Button
           size="xs"
-          variant="light"
-          color={clipboard.copied ? "teal" : undefined}
+          variant={clipboard.copied ? "filled" : "light"}
           onClick={() => clipboard.copy(JSON.stringify(value, null, 2))}
         >
           {clipboard.copied ? "Copied" : "Copy raw JSON"}

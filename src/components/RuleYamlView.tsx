@@ -59,8 +59,7 @@ export function RuleYamlView({ value }: RuleYamlViewProps): React.JSX.Element {
         </Button>
         <Button
           size="xs"
-          variant="light"
-          color={clipboard.copied ? "teal" : undefined}
+          variant={clipboard.copied ? "filled" : "light"}
           onClick={() => clipboard.copy(text)}
         >
           {clipboard.copied ? "Copied" : "Copy raw YAML"}
