@@ -1021,7 +1021,7 @@ export interface components {
             libraryMetadataBasis?: string;
             /** @description External-dictionary degradation note — present only when some dictionary rule in the run could not be answered; names what loaded (with versions), what did not and why, and the answerable count */
             dictionaryBasis?: string;
-            /** @description CT declaration mismatch note — present only when the Define-XML declares a controlled-terminology package set that differs from the one the run used ("define declares X; run used Y") */
+            /** @description Run-level controlled-terminology note — present when the Define-XML declares a CT package set that differs from the one the run used ("define declares X; run used Y"), when the run took its CT from the Trial Summary or ignored a Trial Summary CT value that is not a valid date, or when the caller added a CT resolution note; absent otherwise */
             ctDeclarationMismatch?: string;
             /** @description Define-XML metadata degradation note — present only when the Define-XML could not be parsed directly and names what the define metadata degraded to */
             defineMetadataBasis?: string;

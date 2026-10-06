@@ -696,12 +696,14 @@ export function ResultsView({ checkRunId, status }: ResultsViewProps): React.JSX
           </Alert>
         )}
 
-      {/* The CT declaration mismatch is a property of the RUN, never a finding and not a
-          degradation (engine: define-ct §4.2): the Define-XML declared one CT package set and the
-          run used another. Its own informational callout, so it is neither skimmed past as an
-          Info row nor misread as "some rules could not be answered" (review M2). */}
+      {/* The run's CT note is a property of the RUN, never a finding and not a degradation
+          (engine: define-ct §4.2): the Define-XML declared one CT package set and the run used
+          another, the run took its CT from the Trial Summary, or Trial Summary CT values were
+          ignored (PLAN-ct-packages-default-and-ts-source CQ7: titled "CT selection"). Its own
+          informational callout, so it is neither skimmed past as an Info row nor misread as
+          "some rules could not be answered" (review M2). */}
       {conformance?.ctDeclarationMismatch && (
-        <Alert color="blue" title="CT declaration mismatch">
+        <Alert color="blue" title="CT selection">
           <Text size="sm">{conformance.ctDeclarationMismatch}</Text>
         </Alert>
       )}

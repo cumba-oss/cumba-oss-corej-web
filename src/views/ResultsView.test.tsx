@@ -225,7 +225,7 @@ describe("ResultsView", () => {
     // Neither of the other notes is fabricated from an absent field.
     expect(screen.queryByText(/Dictionary basis:/)).not.toBeInTheDocument();
     expect(screen.queryByText(/Library metadata basis:/)).not.toBeInTheDocument();
-    expect(screen.queryByText("CT declaration mismatch")).not.toBeInTheDocument();
+    expect(screen.queryByText("CT selection")).not.toBeInTheDocument();
   });
 
   it("shows a CT declaration mismatch as its own note, never as a degraded run", async () => {
@@ -241,7 +241,7 @@ describe("ResultsView", () => {
       ),
     );
     renderWithProviders(<ResultsView checkRunId="run-1" status="SUCCEEDED" />);
-    expect(await screen.findByText("CT declaration mismatch")).toBeInTheDocument();
+    expect(await screen.findByText("CT selection")).toBeInTheDocument();
     expect(
       screen.getByText("define declares sdtmct-2023-12-15; run used sdtmct-2024-09-27"),
     ).toBeInTheDocument();
