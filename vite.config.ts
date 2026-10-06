@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 // Scoped import: tsconfig restricts global `types`, so `process` is not a
 // global here — pull it from node:process (config runs under Node).
 import * as process from "node:process";
+import { brandPlugin } from "./scripts/vite-brand-plugin.ts";
 
 // CI caps the vitest worker pool via VITEST_MAX_WORKERS so the heavy jsdom
 // suite doesn't saturate the Gitea runner host — a saturated host stalls the
@@ -14,7 +15,9 @@ const maxWorkers = process.env.VITEST_MAX_WORKERS
   : undefined;
 
 export default defineConfig({
-  plugins: [react()],
+  // brandPlugin: dist/brands/** + dist/brand/ (= neutral), /brand/ served from brands/$BRAND in dev
+  // and preview, an unknown BRAND refused at start-up (scripts/vite-brand-plugin.ts).
+  plugins: [react(), brandPlugin()],
   server: { proxy: { "/api": "http://localhost:8080" } },
   build: {
     // Split the heavy, rarely-changing vendor libraries into their own chunks so the app bundle

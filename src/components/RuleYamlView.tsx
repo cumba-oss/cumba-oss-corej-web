@@ -1,11 +1,12 @@
 import { useCallback, useMemo, useRef } from "react";
-import { Box, Button, Group, Stack, Text, useMantineColorScheme } from "@mantine/core";
+import { Box, Button, Group, Stack, Text, useComputedColorScheme } from "@mantine/core";
 import { useClipboard } from "@mantine/hooks";
 import CodeMirror, { type ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import { EditorView } from "@codemirror/view";
 import { foldAll, unfoldAll } from "@codemirror/language";
 import { yaml } from "@codemirror/lang-yaml";
 import { stringifyYaml } from "../util/toYaml";
+import { codeTheme } from "../brand/codeTheme";
 
 export interface RuleYamlViewProps {
   /** The rule object (source or expanded). `null`/`undefined` renders an em-dash. */
@@ -23,7 +24,9 @@ export interface RuleYamlViewProps {
  * editor.
  */
 export function RuleYamlView({ value }: RuleYamlViewProps): React.JSX.Element {
-  const { colorScheme } = useMantineColorScheme();
+  // The COMPUTED scheme: under "auto" useMantineColorScheme() answers "auto", never "dark"; the
+  // initial value is read synchronously so the viewer never renders light first and flips.
+  const colorScheme = useComputedColorScheme("light", { getInitialValueInEffect: false });
   const clipboard = useClipboard({ timeout: 1500 });
   const editorRef = useRef<ReactCodeMirrorRef>(null);
 
@@ -71,7 +74,7 @@ export function RuleYamlView({ value }: RuleYamlViewProps): React.JSX.Element {
           style={{ height: "100%" }}
           editable={false}
           readOnly
-          theme={colorScheme === "dark" ? "dark" : "light"}
+          theme={codeTheme(colorScheme)}
           extensions={[yaml(), EditorView.lineWrapping]}
           basicSetup={{
             lineNumbers: true,

@@ -32,6 +32,21 @@ mvn -Pbundle-web clean package -Dweb.dist.dir=/tmp/web-dist
 default deliberately points at a path that does not, and a `web.dist.dir` that is missing
 is *skipped with a warning* — you get a green build and an API-only jar, not an error.
 
+Bundled this way, the brand (next section) is selected with `COREJ_BRAND_NAME=<name>` in the
+service's environment; a brand of your own goes to `config/brands/<name>/` of the service bundle
+(its `config/README.md`).
+
+## The brand
+
+The look is a deployment choice: `brands/<name>/` holds a brand (`brand.css` tokens for light
+and dark, an optional `brand.json` with a logo), and `neutral` (the default look) and `p300`
+(the corej.p-300.com house style) ship in this archive. The app always loads
+**`/brand/brand.css`**; `brand/` here is a copy of `neutral`, so a plain static server shows the
+default look with no configuration. To select another brand, **replace the contents of `brand/`**
+with those of `brands/<name>/` (or map `/brand/` to that folder in your server). The token
+contract and how to write a brand of your own: `brands/README.md` in the source repository.
+Light/dark follows the OS, with the switch in the header.
+
 ## Verifying this archive
 
 Each release asset is signed with the same GPG key as the project's Maven Central

@@ -6,6 +6,9 @@ import { RunsView } from "./views/RunsView";
 import { ResultsView } from "./views/ResultsView";
 import { getInfo } from "./api/info";
 import type { CheckRunStatusT, InfoT } from "./api/types";
+import { BrandMark } from "./brand/BrandMark";
+import { ThemeToggle } from "./brand/ThemeToggle";
+import { useBrand } from "./brand/useBrand";
 
 type TabValue = "sessions" | "runs" | "results";
 
@@ -55,10 +58,19 @@ export default function App(): React.JSX.Element {
   });
   const containerSize = wideLayout ? WIDE_CONTAINER_WIDTH : "xl";
 
+  // The deployment's brand: logo and kicker left of the title (the title is the app's own), the
+  // light/dark toggle at the right end (PLAN-web-branding-and-theme §5.4).
+  const brand = useBrand();
+
   return (
     <AppShell header={{ height: 56 }} footer={{ height: 36 }} padding="md">
       <AppShell.Header>
-        <Container size={containerSize} h="100%" style={{ display: "flex", alignItems: "center" }}>
+        <Container
+          size={containerSize}
+          h="100%"
+          style={{ display: "flex", alignItems: "center", gap: "var(--mantine-spacing-sm)" }}
+        >
+          <BrandMark brand={brand} />
           <Title order={3}>corej CDISC validation</Title>
           <Switch
             ml="auto"
@@ -67,6 +79,7 @@ export default function App(): React.JSX.Element {
             checked={wideLayout}
             onChange={(event) => setWideLayout(event.currentTarget.checked)}
           />
+          <ThemeToggle />
         </Container>
       </AppShell.Header>
 

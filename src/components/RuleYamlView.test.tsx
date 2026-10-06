@@ -1,5 +1,6 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { screen, within } from "@testing-library/react";
+import { EditorView } from "@codemirror/view";
 import userEvent from "@testing-library/user-event";
 import { renderWithProviders } from "../test/renderWithProviders";
 import { RuleYamlView } from "./RuleYamlView";
@@ -63,5 +64,46 @@ describe("RuleYamlView", () => {
 
     expect(writeText).toHaveBeenCalledWith(stringifyYaml(RULE));
     expect(await within(copyBtn).findByText("Copied")).toBeInTheDocument();
+  });
+
+  describe("colour scheme", () => {
+    afterEach(() => {
+      vi.unstubAllGlobals();
+      window.localStorage.clear();
+    });
+
+    function viewOf(container: HTMLElement): EditorView {
+      const dom = container.querySelector(".cm-editor");
+      const view = dom && EditorView.findFromDOM(dom as HTMLElement);
+      if (!view) throw new Error("no CodeMirror view");
+      return view;
+    }
+
+    it("follows the COMPUTED scheme: auto on a dark OS gives the dark brand theme at first render", () => {
+      // under "auto" useMantineColorScheme() answers "auto" — the old `=== "dark"` test rendered light
+      vi.stubGlobal("matchMedia", (query: string) => ({
+        matches: query.includes("dark"),
+        media: query,
+        onchange: null,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      }));
+      const { container } = renderWithProviders(<RuleYamlView value={RULE} />);
+      expect(viewOf(container).state.facet(EditorView.darkTheme)).toBe(true);
+    });
+
+    it("takes a stored dark choice", () => {
+      window.localStorage.setItem("cumba-theme", "dark");
+      const { container } = renderWithProviders(<RuleYamlView value={RULE} />);
+      expect(viewOf(container).state.facet(EditorView.darkTheme)).toBe(true);
+    });
+
+    it("is light under auto with a light OS", () => {
+      const { container } = renderWithProviders(<RuleYamlView value={RULE} />);
+      expect(viewOf(container).state.facet(EditorView.darkTheme)).toBe(false);
+    });
   });
 });

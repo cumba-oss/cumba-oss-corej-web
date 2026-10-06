@@ -1501,10 +1501,11 @@ function LogLines({
         lineHeight: 1.4,
         whiteSpace: "pre-wrap",
         wordBreak: "break-word",
-        border: "1px solid var(--mantine-color-gray-3)",
+        // the scheme-aware surface variables (the literal gray-0 / gray-3 were unreadable in dark mode)
+        border: "1px solid var(--mantine-color-default-border)",
         borderRadius: "var(--mantine-radius-sm)",
         padding: "0.5rem 0.75rem",
-        background: "var(--mantine-color-gray-0)",
+        background: "var(--mantine-color-default-hover)",
       }}
     >
       {lines.join("\n")}

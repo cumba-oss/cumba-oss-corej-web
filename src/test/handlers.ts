@@ -284,6 +284,9 @@ export const handlers = [
 
   // Misc
   http.get("/api/info", () => HttpResponse.json(info)),
+
+  // The brand's optional logo file: none by default (setup.ts runs MSW with onUnhandledRequest: "error").
+  http.get("/brand/brand.json", () => HttpResponse.json({})),
 ];
 
 export type { CheckRunRequestT };

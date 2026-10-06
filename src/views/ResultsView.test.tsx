@@ -5,6 +5,7 @@ import { http, HttpResponse } from "msw";
 import { MantineProvider } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
 import { renderWithProviders } from "../test/renderWithProviders";
+import { brandCssVariables, brandTheme } from "../brand/theme";
 import { ResultsView } from "./ResultsView";
 import { server } from "../test/server";
 
@@ -117,7 +118,7 @@ describe("ResultsView", () => {
     // Pointing the view at a different, RUNNING run re-seeds the live status,
     // clears the SUCCEEDED-only sources during render, and shows the live panel.
     rerender(
-      <MantineProvider>
+      <MantineProvider theme={brandTheme} cssVariablesResolver={brandCssVariables}>
         <Notifications />
         <ResultsView checkRunId="run-2" status="RUNNING" />
       </MantineProvider>,

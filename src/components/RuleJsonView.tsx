@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { Box, Button, Group, ScrollArea, Stack, Text, useMantineColorScheme } from "@mantine/core";
+import { Box, Button, Group, ScrollArea, Stack, Text } from "@mantine/core";
 import { useClipboard } from "@mantine/hooks";
 import { JSONTree, type KeyPath, type ShouldExpandNodeInitially } from "react-json-tree";
 
@@ -11,28 +11,30 @@ import { JSONTree, type KeyPath, type ShouldExpandNodeInitially } from "react-js
 const COLLAPSED_TOP_LEVEL_KEYS = new Set<string>(["Authorities"]);
 
 /**
- * base16 palette for the tree. react-json-tree ships dark base16 themes; we
- * supply an explicit one and flip it to a light variant via `invertTheme`
- * when Mantine is in light mode, so the colours track the app's colour scheme.
+ * base16 palette for the tree, mapped onto the brand's code tokens (`--brand-code-*`, which carry
+ * both colour schemes, so no `invertTheme`): base0D keys, base0B strings, base09 numbers — and
+ * booleans, react-json-tree colours both with base09 — base08 null/undefined, base03 the item
+ * counts, base00 the background, base05/07 the text. The remaining slots are unused by the tree's
+ * value renderers and point at the nearest token.
  */
-const TREE_THEME = {
+export const TREE_THEME = {
   scheme: "corej",
-  base00: "transparent",
-  base01: "#2a2c2e",
-  base02: "#3a3d41",
-  base03: "#6c7079",
-  base04: "#969aa3",
-  base05: "#c5c8c6",
-  base06: "#e0e0e0",
-  base07: "#ffffff",
-  base08: "#fb4934",
-  base09: "#fe8019",
-  base0A: "#fabd2f",
-  base0B: "#b8bb26",
-  base0C: "#8ec07c",
-  base0D: "#83a598",
-  base0E: "#d3869b",
-  base0F: "#d65d0e",
+  base00: "var(--brand-code-bg)",
+  base01: "var(--brand-surface-hover)",
+  base02: "var(--brand-border)",
+  base03: "var(--brand-code-comment)",
+  base04: "var(--brand-text-dimmed)",
+  base05: "var(--brand-code-fg)",
+  base06: "var(--brand-code-fg)",
+  base07: "var(--brand-code-fg)",
+  base08: "var(--brand-code-keyword)",
+  base09: "var(--brand-code-number)",
+  base0A: "var(--brand-code-number)",
+  base0B: "var(--brand-code-string)",
+  base0C: "var(--brand-code-string)",
+  base0D: "var(--brand-code-key)",
+  base0E: "var(--brand-code-keyword)",
+  base0F: "var(--brand-code-number)",
 } as const;
 
 export interface RuleJsonViewProps {
@@ -51,7 +53,6 @@ export interface RuleJsonViewProps {
  * library-internal-API-free way to drive all/none).
  */
 export function RuleJsonView({ value }: RuleJsonViewProps): React.JSX.Element {
-  const { colorScheme } = useMantineColorScheme();
   const clipboard = useClipboard({ timeout: 1500 });
   const [forced, setForced] = useState<"open" | "closed" | null>(null);
 
@@ -111,7 +112,7 @@ export function RuleJsonView({ value }: RuleJsonViewProps): React.JSX.Element {
             data={value}
             hideRoot
             theme={TREE_THEME}
-            invertTheme={colorScheme !== "dark"}
+            invertTheme={false}
             shouldExpandNodeInitially={shouldExpandNodeInitially}
           />
         </Box>

@@ -156,6 +156,26 @@ is *skipped with a warning* — you get a green build and an API-only jar, not a
 Served standalone instead, it needs a static server that falls back unknown paths to
 `index.html` (client-side routing), and the API reachable at `/api` on the same origin.
 
+## Branding and the light/dark switch
+
+The look is a **deployment choice**: a brand is a named folder under [`brands/`](brands/) —
+`brand.css` with the design tokens for light **and** dark, an optional `brand.json` for a logo and
+a kicker, fonts and images. Two ship: `neutral` (the default, the stock look plus a dark scheme)
+and `p300` (the corej.p-300.com house style; its logo and wordmark are P300 trademarks, see
+`brands/p300/NOTICE.md`). The SPA always loads `/brand/brand.css`; whatever serves it maps
+`/brand/` to the chosen folder, selected **by name**: `BRAND=<name>` for `npm run dev` /
+`vite preview`; `COREJ_BRAND_NAME=<name>` when bundled into `cumba-oss-corej-rest`
+(`-Pbundle-web`); a plain static server serves `dist/brand/` (a copy of `neutral` — replace it to
+pick another). An unknown name refuses to start and lists the available ones. The token contract
+and how to add a brand of your own: [`brands/README.md`](brands/README.md).
+
+The colour scheme follows the OS and the header's sun/moon toggle overrides it (a choice equal to
+the OS preference is forgotten again); `public/theme-init.js` applies the stored choice before the
+first paint. Code: `src/brand/` (the Mantine theme built from the tokens, the CodeMirror and
+JSON-tree colours, the toggle, the logo) and `scripts/vite-brand-plugin.ts` (copies the brands
+into `dist/`, serves `/brand/` in dev and preview, checks `BRAND`). The kit is shared byte for
+byte with `cumba-oss-corej-rule-editor-web`.
+
 ## Licence
 
 AGPL-3.0-only. See [LICENSE](LICENSE).

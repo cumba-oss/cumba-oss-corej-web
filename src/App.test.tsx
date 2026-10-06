@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { http, HttpResponse } from "msw";
+import { server } from "./test/server";
 import { renderWithProviders } from "./test/renderWithProviders";
 import App from "./App";
 
@@ -47,5 +49,28 @@ describe("App", () => {
     await waitFor(() =>
       expect(screen.getByRole("tab", { name: "Results" })).toHaveAttribute("aria-selected", "true"),
     );
+  });
+
+  it("shows the brand's logo and kicker beside the title, and the light/dark toggle", async () => {
+    server.use(
+      http.get("/brand/brand.json", () =>
+        HttpResponse.json({
+          logo: "logo.svg",
+          logoDark: "logo-dark.svg",
+          kicker: "made by X",
+          kickerUrl: "https://x.example/",
+        }),
+      ),
+    );
+    const { container } = renderWithProviders(<App />);
+    expect(await screen.findByRole("link", { name: "made by X" })).toHaveAttribute(
+      "href",
+      "https://x.example/",
+    );
+    expect(
+      [...container.querySelectorAll("img[data-brand-logo]")].map((img) => img.getAttribute("src")),
+    ).toEqual(["/brand/logo.svg", "/brand/logo-dark.svg"]);
+    expect(screen.getByRole("button", { name: "Switch to dark mode" })).toBeInTheDocument();
+    expect(screen.getByText("corej CDISC validation")).toBeInTheDocument();
   });
 });

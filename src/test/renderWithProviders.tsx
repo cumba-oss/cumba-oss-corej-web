@@ -1,7 +1,12 @@
 import type { ReactNode } from "react";
 import { render, type RenderResult } from "@testing-library/react";
-import { MantineProvider } from "@mantine/core";
+import { localStorageColorSchemeManager, MantineProvider } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
+import { brandCssVariables, brandTheme } from "../brand/theme";
+
+// The same theme and colour-scheme manager as src/main.tsx, so the brand bridge and the toggle are
+// what the tests exercise (the manager reads the jsdom localStorage; tests clear it).
+const colorSchemeManager = localStorageColorSchemeManager({ key: "cumba-theme" });
 
 /**
  * Render a component tree wrapped in the same providers as the real app
@@ -16,7 +21,13 @@ import { Notifications } from "@mantine/notifications";
  */
 export function renderWithProviders(ui: ReactNode): RenderResult {
   return render(
-    <MantineProvider env="test">
+    <MantineProvider
+      env="test"
+      theme={brandTheme}
+      cssVariablesResolver={brandCssVariables}
+      defaultColorScheme="auto"
+      colorSchemeManager={colorSchemeManager}
+    >
       <Notifications />
       {ui}
     </MantineProvider>,

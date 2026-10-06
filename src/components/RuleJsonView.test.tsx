@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderWithProviders } from "../test/renderWithProviders";
-import { RuleJsonView } from "./RuleJsonView";
+import { RuleJsonView, TREE_THEME } from "./RuleJsonView";
 
 /** A rule-shaped object: top-level Authorities (collapsed by default) + Check (expanded). */
 const RULE = {
@@ -82,5 +82,23 @@ describe("RuleJsonView", () => {
     expect(writeText).toHaveBeenCalledWith(JSON.stringify(RULE, null, 2));
     // Brief "Copied" affordance.
     expect(await within(copyBtn).findByText("Copied")).toBeInTheDocument();
+  });
+
+  it("colours the tree from the brand's code tokens (both schemes in the tokens, no inverted theme)", () => {
+    expect(Object.values(TREE_THEME).filter((v) => v.startsWith("#"))).toEqual([]);
+    expect(TREE_THEME.base0D).toBe("var(--brand-code-key)");
+    expect(TREE_THEME.base0B).toBe("var(--brand-code-string)");
+    expect(TREE_THEME.base09).toBe("var(--brand-code-number)");
+    expect(TREE_THEME.base08).toBe("var(--brand-code-keyword)");
+    const { container } = renderWithProviders(
+      <RuleJsonView value={{ Key: "text", N: 1, Flag: true, Nothing: null }} />,
+    );
+    const styles = [...container.querySelectorAll<HTMLElement>("ul li *")]
+      .map((el) => el.getAttribute("style") ?? "")
+      .join("\n");
+    expect(styles).toContain("var(--brand-code-key)");
+    expect(styles).toContain("var(--brand-code-string)");
+    expect(styles).toContain("var(--brand-code-number)");
+    expect(styles).toContain("var(--brand-code-keyword)");
   });
 });
