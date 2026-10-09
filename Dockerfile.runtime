@@ -1,0 +1,42 @@
+# syntax=docker/dockerfile:1
+#
+# CI runtime image for the coreJ validator SPA (PLAN-ci-snapshots-and-container-images D5, D6):
+# nginx + docker/nginx.conf + docker/25-cumba-brand.sh + the built dist. nginx serves the SPA
+# and proxies /api (and the OpenAPI paths) to corej-rest, so the browser sees ONE origin — the
+# SPA's API client is same-origin (src/api/client.ts). No Node: the SPA was built once by the
+# workflow's build job, and the image carries the same bytes as the release zip.
+#
+# Context is THIS REPOSITORY. The build job uploads target/cumba-oss-corej-web-<version>.zip (the
+# release zip, on every push; its root IS the dist); the publish-image job of
+# .github/workflows/ci.yml unzips it into image-ctx/corej-web/. ⚠ Never the repo-root dist/:
+# .dockerignore excludes it, image-ctx/ deliberately is not excluded. By hand, from a built tree
+# (docker/DOCKER.md):
+#
+#   npm ci && npm run build
+#   mkdir -p image-ctx && rm -rf image-ctx/corej-web && cp -a dist image-ctx/corej-web
+#   docker build -f Dockerfile.runtime -t corej-web:local .
+#
+# Published as docker.io/p300/corej-web (README § Container image). The base image is the
+# build arg NGINX_IMAGE; CI keeps the default, Docker Hub's nginx:1.27-alpine. Ported from
+# cumba-oss-corej-rule-editor-web's Dockerfile.runtime — keep the two in step.
+#
+# The upstream: API_UPSTREAM (host:port, default the compose service corej-rest:8080), as a
+# build arg or in the container's environment. The brand (PLAN-web-branding-and-theme):
+# BRAND=<name> selects the folder under /usr/share/nginx/html/brands/ that nginx serves as
+# /brand/ (default neutral; p300 ships too); docker/25-cumba-brand.sh refuses to start on an
+# unknown name, naming the available ones.
+ARG NGINX_IMAGE=nginx:1.27-alpine
+FROM ${NGINX_IMAGE}
+
+ARG API_UPSTREAM=corej-rest:8080
+COPY docker/nginx.conf /etc/nginx/templates/default.conf.template
+# The official image renders /etc/nginx/templates/*.template with envsubst at start-up,
+# substituting only the variables named in NGINX_ENVSUBST_FILTER (nginx's own $vars survive).
+ENV API_UPSTREAM=${API_UPSTREAM} \
+    BRAND=neutral \
+    NGINX_ENVSUBST_FILTER="API_UPSTREAM|BRAND"
+# ⚠ --chmod=0755 is load-bearing: the entrypoint IGNORES a non-executable script ("Ignoring …
+# not executable"), and an unchecked unknown BRAND would then 404 /brand/brand.css with no error.
+COPY --chmod=0755 docker/25-cumba-brand.sh /docker-entrypoint.d/25-cumba-brand.sh
+COPY image-ctx/corej-web/ /usr/share/nginx/html/
+EXPOSE 80

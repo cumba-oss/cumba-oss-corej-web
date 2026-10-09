@@ -1,0 +1,77 @@
+# The coreJ validator as two containers (PLAN-ci-snapshots-and-container-images D6):
+#
+#   corej-web   nginx serving the built SPA and proxying /api (and the OpenAPI paths) to
+#               corej-rest — the browser sees ONE origin (the SPA's API client is same-origin);
+#   corej-rest  the validation service, its data (sessions, reports, the rule corpora, the
+#               metadata store, dictionaries) on the `corej-data` volume.
+#
+# Both run the PUBLISHED images that CI pushes to Docker Hub, docker.io/p300 (docker/DOCKER.md):
+#
+#     docker compose up -d                       # Podman: podman-compose up -d
+#
+# and open http://127.0.0.1:8080/. COREJ_REST_TAG and COREJ_WEB_TAG pick each image's version:
+# `latest` (default) is the newest release; the repo's `X.Y.Z-SNAPSHOT` follows its main;
+# `sha-<short>` pins one main commit. ⚠ Two variables, not one: the two repos are versioned and
+# committed independently, so a release number or a `sha-` tag of one names nothing in the other.
+# An image built by hand (docker/DOCKER.md, "Build the image yourself") replaces one service's
+# `image:` in a docker-compose.override.yml.
+#
+# ⚠ Plain HTTP, published on the LOOPBACK only (127.0.0.1). To serve other machines, put a
+# TLS-terminating reverse proxy in front of ${WEB_PORT}.
+#
+# ⚠ The metadata store. Nothing creates it by default: every library-dependent rule then SKIPs,
+# loudly and by name. COREJ_CACHESEED_ENABLED=true makes corej-rest seed it once at start-up
+# (cumba-oss-corej-rest's docker-compose.yml explains the store in full).
+
+services:
+  corej-rest:
+    image: ${COREJ_REGISTRY:-docker.io}/p300/corej-rest:${COREJ_REST_TAG:-latest}
+    init: true
+    environment:
+      SERVER_PORT: "8080"
+      COREJ_RUNS_MAXPARALLEL: "${COREJ_RUNS_MAXPARALLEL:-2}"
+      # Seed the metadata store (/app/data/metadata-cache.zip, the image's default) once at
+      # start-up; false = provision it yourself, or run without (rules SKIP by name).
+      COREJ_CACHESEED_ENABLED: "${COREJ_CACHESEED_ENABLED:-false}"
+      # ⚠ Upload cap: keep EQUAL to client_max_body_size in docker/nginx.conf (512m) — raise
+      # both together, or nginx answers 413 first (review M1).
+      SPRING_SERVLET_MULTIPART_MAXFILESIZE: "${COREJ_MAX_UPLOAD:-512MB}"
+      SPRING_SERVLET_MULTIPART_MAXREQUESTSIZE: "${COREJ_MAX_UPLOAD:-512MB}"
+      # Seeding from the live CDISC Library only; no validation run reads it.
+      CDISC_API_KEY: "${CDISC_API_KEY:-}"
+      # Extra JVM options, e.g. -Xmx2g.
+      JAVA_TOOL_OPTIONS: "${JAVA_TOOL_OPTIONS:-}"
+    volumes:
+      # A NAMED volume: it inherits the image's ownership (uid 1000), so no chown is needed.
+      # The image's bundled corpora are seeded into it on first start, never overwriting one
+      # already there.
+      - corej-data:/app/data
+    # Not published: only nginx talks to it. Uncomment to reach the API directly.
+    # ports:
+    #   - "127.0.0.1:8081:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/api/info"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+
+  corej-web:
+    image: ${COREJ_REGISTRY:-docker.io}/p300/corej-web:${COREJ_WEB_TAG:-latest}
+    depends_on:
+      - corej-rest
+    environment:
+      # The compose service above; the image's default is the same.
+      API_UPSTREAM: corej-rest:8080
+      # The look (PLAN-web-branding-and-theme): neutral by default, p300 ships too; a brand of
+      # your own is mounted at /usr/share/nginx/html/brands/<name> (docker/DOCKER.md). An
+      # unknown name stops the container at start-up, naming the available ones.
+      BRAND: ${BRAND:-neutral}
+    ports:
+      # the loopback only: plain HTTP never leaves this machine
+      - "127.0.0.1:${WEB_PORT:-8080}:80"
+    restart: unless-stopped
+
+volumes:
+  corej-data:

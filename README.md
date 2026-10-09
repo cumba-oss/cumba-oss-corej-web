@@ -156,6 +156,22 @@ is *skipped with a warning* — you get a green build and an API-only jar, not a
 Served standalone instead, it needs a static server that falls back unknown paths to
 `index.html` (client-side routing), and the API reachable at `/api` on the same origin.
 
+## Container image
+
+CI publishes **`docker.io/p300/corej-web`** to Docker Hub, for linux/amd64 and linux/arm64. The
+`publish-image` job of `.github/workflows/ci.yml` builds [`Dockerfile.runtime`](Dockerfile.runtime)
+from the release zip the build job produced — the zip's dist under nginx, with `docker/nginx.conf`
+and `docker/25-cumba-brand.sh` — so the image carries the release's bytes and no Maven or npm runs
+inside the image build.
+
+| pushed by      | tags                                                                                             |
+| -------------- | ------------------------------------------------------------------------------------------------ |
+| a tag `vX.Y.Z` | `X.Y.Z` and `latest` — `latest` only ever means a release                                        |
+| a push to main | `X.Y.Z-SNAPSHOT`, the pom's `<revision>` (moves with main), and `sha-<short commit>` (immutable) |
+
+The pair with `corej-rest` (one origin, `/api` proxied, a 512 MB upload limit equal to
+corej-rest's): [`docker-compose.yml`](docker-compose.yml) and [`docker/DOCKER.md`](docker/DOCKER.md).
+
 ## Branding and the light/dark switch
 
 The look is a **deployment choice**: a brand is a named folder under [`brands/`](brands/) —

@@ -41,3 +41,6 @@ coverage/
 
 # .env files
 .env
+
+# Container image context, staged by CI's publish-image job (Dockerfile.runtime) or by hand
+image-ctx/

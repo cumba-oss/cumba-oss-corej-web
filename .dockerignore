@@ -1,0 +1,22 @@
+# Build context hygiene for Dockerfile.runtime (PLAN-ci-snapshots-and-container-images D5): the
+# image copies only docker/ and image-ctx/corej-web/, so send nothing the build produces or a
+# developer keeps locally.
+node_modules/
+# ⚠ The repo-root dist/ is excluded on purpose: the image takes the dist from image-ctx/corej-web/
+# (the release zip, unpacked by CI), so a stale local dist/ can never reach it.
+dist/
+coverage/
+target/
+.git
+.gitea/
+.github/
+.idea/
+.vscode/
+# vite bakes VITE_* values from .env files into dist/ — a developer's local one must not ship.
+.env*
+.claude/
+*.iml
+.flattened-pom.xml
+
+# ⚠ image-ctx/ is NOT excluded: Dockerfile.runtime consumes the dist staged there by the
+# publish-image job. Excluding it would make the image build fail on a missing COPY source.
