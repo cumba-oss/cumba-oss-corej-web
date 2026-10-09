@@ -20,3 +20,7 @@ target/
 
 # ⚠ image-ctx/ is NOT excluded: Dockerfile.runtime consumes the dist staged there by the
 # publish-image job. Excluding it would make the image build fail on a missing COPY source.
+
+# The release zip CI downloads for Dockerfile.runtime (publish-image job). The image takes the
+# unpacked copy from image-ctx/, so the zip itself must never enter the build context.
+release-archives/
