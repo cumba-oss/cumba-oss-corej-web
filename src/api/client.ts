@@ -74,8 +74,7 @@ export function toProblem(error: unknown, response: Response): ProblemError {
  * Response or guess at the error shape.
  */
 export type ApiResult<T> =
-  | { data: T; problem?: undefined }
-  | { data?: undefined; problem: ProblemError };
+  { data: T; problem?: undefined } | { data?: undefined; problem: ProblemError };
 
 /** Build an ok result. */
 export function ok<T>(data: T): ApiResult<T> {
