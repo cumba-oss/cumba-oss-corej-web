@@ -28,6 +28,6 @@ class ResizeObserverStub {
 }
 window.ResizeObserver = ResizeObserverStub as unknown as typeof ResizeObserver;
 
-beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
+beforeAll(() => server.listen({ onUnhandledFrame: "error" }));
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
